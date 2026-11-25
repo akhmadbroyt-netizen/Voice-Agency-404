@@ -14,7 +14,7 @@
 - Har bir yangi vaqt taklifi o‘z tasdiqlash kodini oladi. Eski xabarga javob yangi taklifni band qilib yubormaydi. Suhbat qayta ishlanganda band qilingan xizmat va tarif saqlanadi.
 - Lokal PCM musiqasi sozlangan bo‘lsa, ikkinchi kiruvchi qo‘ng‘iroq kutish rejimiga olinadi. Ixtiyoriy ovozli e’londan so‘ng musiqa takrorlanadi. Birinchi suhbat tugagach, Gemini kutayotgan mijozga ulanadi. Ikki telefon bilan jonli sinov hali o‘tkazilmagan.
 - Respublika yoki biznes miqyosidagi natijalar pilotda o‘lchanadi. README’da qo‘ng‘iroqdan bronga o‘tish, bo‘shagan vaqtni to‘ldirish va xodim vaqti uchun hisoblash usullari bor.
-- 404 jamoasining [pitch decki](docs/pitch-deck.html), [texnik taqdimoti](docs/technical-pitch.html) va [o‘zbekcha V2 videosi](docs/voice-agency-404-v2.mp4) qo‘shildi. Video 25-noyabr hakaton prototipini haqiqiy dashboard ekranlari va demo ma’lumotlari bilan ko‘rsatadi.
+- 404 jamoasining [pitch decki](docs/pitch-deck.html), [texnik taqdimoti](docs/technical-pitch.html) va [o‘zbekcha V2 videosi](https://github.com/akhmadbroyt-netizen/Voice-Agency-404/blob/82f94c2/docs/voice-agency-404-v2.mp4) qo‘shildi. Video 25-noyabr hakaton prototipini haqiqiy dashboard ekranlari va demo ma’lumotlari bilan ko‘rsatadi.
 
 [GitHub’dagi v0.2 dan keyingi o‘zgarishlar](https://github.com/akhmadbroyt-netizen/Voice-Agency-404/compare/45dbebf...main)
 
