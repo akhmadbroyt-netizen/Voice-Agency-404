@@ -7,6 +7,14 @@
 
 **404 jamoasi yaratgan o‘zbekcha ovozli avtoservis yordamchisi.** Mijoz Telegram orqali qo‘ng‘iroq qiladi. AI muammoni eshitadi, ustaga kerakli tafsilotlarni so‘raydi va tashrif so‘rovini kalendarga yozadi. Usta sayt orqali so‘rovni qabul qiladi, rad etadi yoki boshqa vaqt taklif qiladi.
 
+[Pitch deck](docs/pitch-deck.html) · [Windows ishga tushirgichi](start-demo.bat) · [Demo ssenariysi](#-hakamlar-uchun-sinov)
+
+![Voice Agency 404 dashboardi, namunaviy maʼlumotlar bilan](docs/dashboard-preview.jpg)
+
+## 🎞️ Pitch deck
+
+[HTML faylini](docs/pitch-deck.html) GitHubʼdan yuklab olib brauzerda oching. **← / →** bilan slaydlarni almashtiring, **F** bilan to‘liq ekranga o‘ting. To‘qqiz slaydda muammo, AI qo‘ng‘irog‘i, usta kalendari, kutish navbati, pilot o‘lchovlari va kengaytirish rejasi bor. Slaydlar oflayn ochiladi. Jonli dashboard havolasi lokal demo ishga tushganda ishlaydi.
+
 ## 🎬 Bitta tugma bilan demo
 
 1. **Python 3.14 x64** va Windows Python Launcher o‘rnatilgan bo‘lsin.
