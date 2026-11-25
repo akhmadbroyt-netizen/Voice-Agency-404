@@ -48,7 +48,7 @@ def database():
         request_id TEXT PRIMARY KEY, language TEXT NOT NULL
     )""")
     required = {"previous_slot": "TEXT", "move_requested": "INTEGER NOT NULL DEFAULT 0",
-                "reminder": "TEXT"}
+                "reminder": "TEXT", "offer_code": "TEXT"}
     columns = {row["name"] for row in connection.execute("PRAGMA table_info(decisions)")}
     if required.keys() - columns or connection.execute(
         "SELECT 1 FROM sqlite_master WHERE name='unique_reserved_slot'"
@@ -81,6 +81,12 @@ def save_request(caller_id, username, car, issue, service, wants_visit, phone=""
     label, low, high = TARIFFS[service] if service else ("Qo'ng'iroq", 0, 0)
     request_id = request_id or uuid4().hex[:12]
     with closing(database()) as connection, connection:
+        connection.execute("BEGIN IMMEDIATE")
+        reserved = connection.execute("""SELECT r.visit, r.service, r.low, r.high
+            FROM requests r JOIN decisions d ON d.request_id=r.id
+            WHERE r.id=? AND d.status IN ('accepted', 'offered')""", (request_id,)).fetchone()
+        if reserved:
+            visit, label, low, high = reserved
         connection.execute("""INSERT INTO requests VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET username=excluded.username, phone=excluded.phone,
             visit=excluded.visit, car=excluded.car, issue=excluded.issue,
@@ -166,6 +172,7 @@ def decide(request_id, action, slot=None):
         if previous and (previous["delivery"] == "queued" or (previous["status"] == "accepted" and not moving)):
             raise ValueError("Bu murojaat band qilingan yoki xabari yuborilmoqda.")
         previous_slot = (previous["slot"] if moving else previous["previous_slot"]) if previous else None
+        offer_code = None
         if action == "reject" and previous_slot:
             raise ValueError("Eski bron saqlangan. Boshqa vaqtni taklif qiling.")
         if action == "reject":
@@ -186,20 +193,22 @@ def decide(request_id, action, slot=None):
             label = slot.replace("T", " ")
             worker = assigned_staff(connection, request["service"], request_id)
             status = "accepted" if action == "accept" else "offered"
+            if status == "offered":
+                offer_code = uuid4().hex[:12]
             notice = (f"Bo'ldi, {label} da {worker} usta sizga xizmat korsatadi. Diagnostikaga keling. Vaqtni ko'chirish uchun KOCHIR {request_id} deb yozing." if action == "accept" else
                       f"{label} da {worker} ustaga diagnostikaga kela olasizmi? Ushbu xabarga Bo'ladi deb javob bering "
-                      f"yoki BO'LADI {request_id} deb yozing.")
+                      f"yoki BO'LADI {offer_code} deb yozing.")
         else:
             raise ValueError("Amal tanlanmagan.")
         if slot and not slot_available(connection, request["service"], slot, request_id):
             raise ValueError("Bu ustaning vaqti band.")
         connection.execute("""INSERT INTO decisions
-            (request_id,status,slot,notice,delivery,previous_slot,reminder)
-            VALUES (?, ?, ?, ?, 'queued', ?, NULL)
+            (request_id,status,slot,notice,delivery,previous_slot,reminder,offer_code)
+            VALUES (?, ?, ?, ?, 'queued', ?, NULL, ?)
             ON CONFLICT(request_id) DO UPDATE SET status=excluded.status, slot=excluded.slot,
             notice=excluded.notice, delivery='queued', message_id=NULL,
-            previous_slot=excluded.previous_slot, move_requested=0, reminder=NULL""",
-                           (request_id, status, slot, notice, previous_slot))
+            previous_slot=excluded.previous_slot, move_requested=0, reminder=NULL, offer_code=excluded.offer_code""",
+                           (request_id, status, slot, notice, previous_slot, offer_code))
 
 
 def staff(service):
@@ -296,13 +305,14 @@ def delivery_result(request_id, message_id=None, kind="decision"):
             connection.execute("UPDATE decisions SET delivery=?, message_id=? WHERE request_id=?",
                                (delivery, message_id, request_id))
 
-def confirm_offer(caller_id, message_id, request_id):
+def confirm_offer(caller_id, message_id, offer_code):
     with closing(database()) as connection, connection:
         connection.execute("BEGIN IMMEDIATE")
         offer = connection.execute("""SELECT d.*, r.service FROM decisions d JOIN requests r ON r.id=d.request_id
             WHERE r.caller_id=? AND d.status='offered' AND d.delivery='sent'
-            AND ((? IS NOT NULL AND d.message_id=?) OR d.request_id=?)""",
-                                   (caller_id, message_id, message_id, request_id)).fetchone()
+            AND ((? IS NOT NULL AND COALESCE(d.offer_code, d.request_id)=?)
+                 OR (? IS NULL AND d.message_id=?))""",
+                                   (caller_id, offer_code, offer_code, offer_code, message_id)).fetchone()
         if not offer or datetime.fromisoformat(offer["slot"]).replace(tzinfo=UZ) <= datetime.now(UZ):
             return False
         label = offer["slot"].replace("T", " ")
