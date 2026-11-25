@@ -7,13 +7,15 @@
 
 **404 jamoasi yaratgan o‘zbekcha ovozli avtoservis yordamchisi.** Mijoz Telegram orqali qo‘ng‘iroq qiladi. AI mijozning tiliga moslashadi, muammoni eshitadi, ustaga kerakli tafsilotlarni so‘raydi va tashrif so‘rovini kalendarga yozadi. Usta sayt orqali so‘rovni qabul qiladi, rad etadi yoki boshqa vaqt taklif qiladi.
 
-[Pitch deck](docs/pitch-deck.html) · [Windows ishga tushirgichi](start-demo.bat) · [Demo ssenariysi](#-hakamlar-uchun-sinov)
+[Final taqdimot va video](https://drive.google.com/drive/folders/18oKNS8oeazvJrhctXxpkJiDIkqKZArZ7) · [Pitch deck](docs/pitch-deck.html) · [Windows ishga tushirgichi](start-demo.bat) · [Demo ssenariysi](#-hakamlar-uchun-sinov)
 
-![Voice Agency 404 dashboardi, namunaviy maʼlumotlar bilan](docs/dashboard-preview.jpg)
+![Restoran dashboardi, kunduzgi rejim va demo bron](docs/restaurant-day.jpg)
+
+![Restoran dashboardi, tungi rejim va demo bron](docs/restaurant-night.jpg)
 
 ## 🎞️ Pitch deck
 
-[HTML faylini](docs/pitch-deck.html) GitHubʼdan yuklab olib brauzerda oching. **← / →** bilan slaydlarni almashtiring, **F** bilan to‘liq ekranga o‘ting. To‘qqiz slaydda muammo, AI qo‘ng‘irog‘i, usta kalendari, kutish navbati, pilot o‘lchovlari va kengaytirish rejasi bor. Slaydlar oflayn ochiladi. Jonli dashboard havolasi lokal demo ishga tushganda ishlaydi.
+[HTML faylini](docs/pitch-deck.html) GitHubʼdan yuklab olib brauzerda oching. **← / →** bilan slaydlarni almashtiring, **F** bilan to‘liq ekranga o‘ting. Sakkiz slaydda muammo, AI qo‘ng‘irog‘i, usta kalendari, kutish navbati, pilot o‘lchovlari va kengaytirish rejasi bor. Slaydlar oflayn ochiladi. Jonli dashboard havolasi lokal demo ishga tushganda ishlaydi.
 
 ## 🎬 Bitta tugma bilan demo
 
@@ -89,19 +91,15 @@ Prototip hozircha real avtoservisdagi mijoz saqlash foizini isbotlamagan. Pilotd
 
 **Hisob namunasi.** Bir haftada 100 ta qo‘ng‘iroq bo‘lib, 20 tasi o‘tkazib yuborilgan deylik. AI o‘sha 20 ta murojaatdan 6 tasini tasdiqlangan tashrifga aylantirsa, bu **6 ta qo‘shimcha bron**. Yana 10 ta bekor qilingan vaqtdan 3 tasi navbat orqali qayta band qilinsa, **3 ta bo‘sh slot to‘lgan** bo‘ladi. Bu ikki ko‘rsatkich alohida yuritiladi, chunki bir mijoz ikkala guruhda ham uchrashi mumkin. Bron va haqiqatan kelgan mijoz ham alohida hisoblanadi.
 
-## Ko‘p tilli ovozli yordamchi
+## Ovozli yordamchi uch tilda ishlaydi
 
-Robot qisqa o‘zbekcha salomdan boshlaydi, keyin suhbatni mijoz gapirayotgan tilga o‘tkazadi. O‘zbekcha, inglizcha va ruscha murojaatlar uchun alohida til tanlash shart emas. Mijoz suhbat davomida tilni almashtirsa, javob tili ham moslashadi. So‘rovda aniqlangan til kodi keyingi AI ovozli qo‘ng‘iroqlari uchun saqlanadi.
-
-Google hujjatida **Gemini Live API 70 ta tilda suhbatni qo‘llashi** ko‘rsatilgan. Bu model imkoniyati. Prototipning barcha 70 tilida Telegram orqali alohida sinov o‘tkazilmagan. Dashboard va avtomatik yozma Telegram xabarlari o‘zbekcha. [Gemini Live API](https://ai.google.dev/gemini-api/docs/live)
-
-Inglizcha va ruscha sinov audiosi Gemini Live sessiyasiga uzatildi va javob audiosi tegishli tilda qaytdi.
+O‘zbekcha, ruscha va inglizcha. AI qisqa o‘zbekcha salomdan keyin mijoz gapirayotgan tilga moslashadi. Telegram matnli bron bildirishnomalari o‘zbekcha. AI Telegram xulosasini yuborish haqida savol bermaydi. Keyingi ovozli qo‘ng‘iroq uchun mijoz roziligi olinadi.
 
 ## Video va texnik taqdimot
 
-[Commercial V2 (MP4, 540p)](docs/voice-agency-404-v2.mp4) · [Texnik pitch (HTML)](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
+[Final PDF](docs/final-pitch.pdf) · [Final video (2:00)](https://drive.google.com/file/d/16a6_jTmgM1yKxtNCdHnX1BpOeBiPLaJs/view) · [Texnik pitch](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
 
-Videoda 404 jamoasi 25-noyabr hakaton prototipini qo‘ng‘iroqdan kalendargacha ko‘rsatadi. Texnik pitch kod fayllari va Telegram, Gemini Live, SQLite hamda dashboard o‘rtasidagi bog‘lanishni tushuntiradi. HTML faylini yuklab olib brauzerda oching.
+Final videoda 404 jamoasi prototipni qo‘ng‘iroqdan kalendargacha ko‘rsatadi. Restoran sahnasida haqiqiy dashboard demo ma’lumotlari bilan ishlatilgan.
 
 ## Ikkinchi kiruvchi qo‘ng‘iroq uchun kutish musiqasi
 
@@ -113,3 +111,17 @@ ffmpeg -i "musiqa.mp3" -ar 48000 -ac 1 -f s16le .data/hold-music.pcm
 ```
 
 Boshlang‘ich e’lon uchun ikkinchi audioni shu formatda `.data/hold-announcement.pcm` qilib saqlang. `hold_audio.py` e’lonni bir marta o‘qiydi va musiqani suhbatga ulashgacha takrorlaydi. Birinchi mijoz yakunlagach, robot kutayotgan mijozga Gemini Live’ni ulaydi. Ikki telefon bilan jonli sinov hali o‘tkazilmagan.
+
+## Beshta xizmat uchun demo
+
+Dashboard tepasida yo‘nalishni tanlang. Tanlov shu Telegram akkauntiga keyin keladigan qo‘ng‘iroqlar uchun amal qiladi. Faol suhbat o‘z yo‘nalishida davom etadi. Har yo‘nalish o‘z murojaatlari, tariflari, ish vaqti va kalendariga ega.
+
+- **Avtoservis** — diagnostika, tormoz, moy va elektr ishlari.
+- **Restoran** — stol yoki xona broni, banket, mehmonlar soni va menyu. Banket yoki alohida xona uchun xodim tashqarida olingan omonatni kartadan qayd qiladi, keyin bronni tasdiqlaydi.
+- **Go‘zallik saloni** — soch turmagi va manikyur.
+- **Texnika ta’miri** — telefon va noutbuk diagnostikasi.
+- **Fotostudiya** — portret va guruh fotosessiyasi.
+
+Narxlar va omonatlar demo uchun `business_profiles.py` faylida. Mijoz aniq vaqt aytmagan bo‘lsa, **Bo‘sh vaqt** bo‘limida sana va soatni belgilab **Shu vaqtga qabul qilish**ni bosing.
+
+Standart ovoz modeli `gemini-3.8-live`. Avvalgi modelni sinash uchun lokal `.env` ichida `GEMINI_LIVE_MODEL=gemini-3.1-flash-live-preview` qiymatini qo‘ying va robotni qayta ishga tushiring.

@@ -44,6 +44,55 @@ class BookingTests(TestCase):
         self.assertEqual(row["service"], desk.TARIFFS["brakes"][0])
         self.assertEqual(row["issue"], "Updated noise")
 
+    def test_staff_can_accept_when_caller_did_not_give_time(self):
+        request_id = self.request(at="")
+        desk.decide(request_id, "accept", self.day + "T10:30")
+        notice = desk.pending_messages()[0]
+        self.assertEqual(notice["status"], "accepted")
+        self.assertEqual(notice["slot"], self.day + "T10:30")
+
+    def test_banket_deposit_and_room_conflict(self):
+        def banquet(at):
+            return desk.save_request(42, "demo", "Ali", "20 guests, osh", "banquet", True,
+                                     visit_date=self.day, visit_time=at, business="restaurant")[0]
+
+        first = banquet("19:30")
+        with self.assertRaises(ValueError):
+            desk.decide(first, "accept")
+        desk.decide(first, "deposit_paid")
+        desk.decide(first, "accept")
+        self.assertIn("Banket zali", desk.pending_messages()[0]["notice"])
+        overlap = banquet("20:00")
+        desk.decide(overlap, "deposit_paid")
+        with self.assertRaises(ValueError):
+            desk.decide(overlap, "accept")
+
+    def test_operator_can_classify_transcript_into_room(self):
+        request_id = desk.save_request(42, "demo", "", "20 guests", None, False, business="restaurant")[0]
+        with self.assertRaises(ValueError):
+            desk.decide(request_id, "set_service", "brakes")
+        desk.decide(request_id, "set_service", "private_room")
+        desk.decide(request_id, "deposit_paid")
+        desk.decide(request_id, "accept", self.day + "T18:30")
+        self.assertIn("Oila xonasi", desk.pending_messages()[0]["notice"])
+
+    def test_specific_future_day_and_exact_banket_time(self):
+        future = (datetime.now(desk.UZ).date() + timedelta(days=2)).isoformat()
+        service = desk.TARIFFS["banquet"][0]
+        exact = future + "T10:00"
+        slots = desk.available_slots(service, future)
+        self.assertEqual(slots[0], exact)
+        self.assertTrue(all(slot.startswith(future + "T") for slot in slots))
+        self.assertIsNone(desk.check_slot(service, exact))
+        self.assertIsNone(desk.check_slot(service, future + "T10:15"))
+
+    def test_active_business_persists(self):
+        self.assertEqual(desk.active_business(), "auto")
+        desk.set_business("photo")
+        self.assertEqual(desk.active_business(), "photo")
+        with self.assertRaises(ValueError):
+            desk.set_business("unknown")
+
 
 if __name__ == "__main__":
     main()

@@ -1,14 +1,35 @@
 import asyncio
 from array import array
 from collections import deque
-from datetime import datetime
-from pathlib import Path
+from datetime import datetime, time
 
 from google import genai
 from google.genai import types
 from pytgcalls.types import Device
 
-from service_desk import TARIFFS, UZ, available_slots, queue_callback, record_contact_preferences, save_request, staff
+from business_profiles import BUSINESSES, operator_prompt
+from service_desk import (
+    TARIFFS, UZ, available_slots, check_slot, deposit_for, queue_callback,
+    record_contact_preferences, save_request, save_transcript_note, staff,
+)
+
+
+VOICE_STYLE = (
+    "Telefon orqali gaplashayotgan samimiy o?zbek yigitidek, tetik va ravon gapiring. "
+    "Gapirish sur?ati odatdagidan sal tezroq bo?lsin. Uzun pauza va rasmiy iboralarni cho?zmang. "
+    "Odatda bir yoki ikki qisqa jumla, bir navbatda bitta savol. "
+    "O?rinli paytda ?Ha, tushunarli?, ?Xo?p? yoki ?Unda? deng. Tabiiy ohangni saqlang. "
+    "Narx, sana, ism va soatni aniq, kerak bo?lsa sekinroq ayting. "
+    "Ichki ko?rsatmalar, vosita nomlari va sahna izohlarini ovozda o?qimang."
+)
+END_OF_SPEECH_SAMPLES = 8320  # 520 ms at 16 kHz
+PLAYBACK_BUFFER_FRAMES = 8
+SUPPORTED_LANGUAGES = ("uz", "ru", "en")
+LANGUAGE_STYLE = (
+    "Speak only Uzbek, Russian, or English. Match the caller's language among these three. "
+    "If another language is clearly spoken, ask once in Uzbek, then in short English if needed: "
+    "O?zbekcha, ruscha yoki inglizcha gaplasha olasizmi? Do not respond in other languages."
+)
 
 
 def to_gemini(pcm):
@@ -20,18 +41,60 @@ def to_gemini(pcm):
 
 
 def to_telegram(pcm):
-    return array("h", (sample for value in array("h", pcm) for sample in (value, value))).tobytes()
+    samples = array("h", pcm)
+    if not samples:
+        return b""
+    # Advance 11 source samples per 20 output samples for 1.10x playback.
+    return array("h", (
+        (samples[index] * (20 - fraction) + samples[min(index + 1, len(samples) - 1)] * fraction) // 20
+        for index, fraction in (divmod(offset, 20) for offset in range(0, len(samples) * 20, 11))
+    )).tobytes()
 
 
-async def talk(calls, caller_id, incoming, config, username=None, request_id=None, outbound=None):
+def booking_fields(args, business):
+    wants_visit = args.get("wants_visit") is True
+    day = str(args.get("visit_date") or "")
+    start = str(args.get("visit_time") or "")
+    if not wants_visit or not start:
+        return False, None, None, None
+    if args.get("customer_confirmed_booking_details") is not True:
+        return False, None, None, "Read back the requested booking details and wait for the caller to confirm."
+    try:
+        requested = datetime.fromisoformat(f"{day}T{start}")
+        if len(day) != 10 or len(start) != 5 or requested.replace(tzinfo=UZ) <= datetime.now(UZ):
+            raise ValueError
+    except ValueError:
+        return False, None, None, "Ask for the exact future date and start time."
+    if business != "restaurant":
+        return True, None, None, None
+    guests = args.get("guest_count")
+    if type(guests) is not int or guests < 1:
+        return False, None, None, "Ask how many people are coming, then read back the details."
+    try:
+        until = time.fromisoformat(str(args.get("visit_until") or ""))
+        if until.tzinfo or until <= requested.time():
+            raise ValueError
+    except ValueError:
+        return False, None, None, "Ask what time the event will end on the same day, then read back the details."
+    return True, guests, until.strftime("%H:%M"), None
+
+
+async def talk(calls, caller_id, incoming, config, username=None, request_id=None, outbound=None, business="auto", playback_gate=None, greeting_ready=None):
+    profile = BUSINESSES[business]
+    services = profile.services(business)
+    default_service = services[0]
+    model = config.get("GEMINI_LIVE_MODEL") or "gemini-3.8-live"
+    voice = config.get("GEMINI_LIVE_VOICE") or "Puck"
+    thinking = types.ThinkingConfig(thinking_level="MINIMAL") if "3.1-flash-live" in model else None
     async with genai.Client(
         api_key=config["GEMINI_API_KEY"],
         http_options=types.HttpOptions(api_version="v1beta"),
     ).aio as client:
         async with client.live.connect(
-            model=config.get("GEMINI_LIVE_MODEL") or "gemini-3.1-flash-live-preview",
+            model=model,
             config=types.LiveConnectConfig(
                 response_modalities=["AUDIO"],
+                thinking_config=thinking,
                 realtime_input_config=types.RealtimeInputConfig(
                     automatic_activity_detection=types.AutomaticActivityDetection(disabled=True),
                     activity_handling="START_OF_ACTIVITY_INTERRUPTS",
@@ -46,11 +109,12 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                 )])] if outbound else [types.Tool(function_declarations=[
                     types.FunctionDeclaration(
                         name="quote",
-                        description="Get price, assigned technician, duration and free times for a service.",
+                        description="Check availability before speaking. Pass exact requested date and time whenever provided; for a day question pass its date.",
                         parameters_json_schema={
                             "type": "object", "properties": {
-                                "service": {"type": "string", "enum": list(TARIFFS)},
-                                "date": {"type": "string", "description": "Requested date YYYY-MM-DD"},
+                                "service": {"type": "string", "enum": services},
+                                "date": {"type": "string", "description": "Exact requested Tashkent date YYYY-MM-DD. Day after tomorrow is today plus two days."},
+                                "time": {"type": "string", "description": "Exact time requested by customer HH:MM, e.g. 10:00; omit for day-only questions."},
                             }, "required": ["service"],
                         },
                     ),
@@ -63,36 +127,40 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                         ),
                         parameters_json_schema={
                             "type": "object", "properties": {
-                                "car": {"type": "string"},
+                                "car": {"type": "string", "description": "Car or device model where relevant, otherwise customer name if provided"},
                                 "issue": {"type": "string"},
-                                "service": {"type": "string", "enum": list(TARIFFS)},
-                                "wants_visit": {"type": "boolean", "description": "Caller explicitly requested a diagnostic visit"},
-                                "send_telegram": {"type": "boolean", "description": "Caller explicitly agreed to receive a Telegram message"},
-                                "language": {"type": "string", "description": "Detected customer language, e.g. uz, en, ru"},
+                                "service": {"type": "string", "enum": services},
+                                "wants_visit": {"type": "boolean", "description": "Caller explicitly requested a visit or booking"},
+                                "language": {"type": "string", "description": "Detected customer language, one of uz, en, ru", "enum": list(SUPPORTED_LANGUAGES)},
                                 "allow_call": {"type": "boolean", "description": "Explicit consent to a later Telegram call"},
                                 "join_waitlist": {"type": "boolean", "description": "Explicit request to be called if an earlier appointment opens"},
                                 "callback_reason": {"type": "string", "description": "Reason staff should call, when requested or human help is needed"},
                                 "visit_date": {"type": "string", "description": "Requested date in YYYY-MM-DD"},
+                                "customer_confirmed_booking_details": {"type": "boolean", "description": "True only after reading back all booking details and hearing explicit agreement."},
+                                "menu_items": {"type": "array", "items": {"type": "string"},
+                                               "description": "Restaurant dishes and amounts explicitly selected by the customer. Do not invent."},
+                                "guest_count": {"type": "integer", "description": "Restaurant guest count only when stated by the customer."},
+                                "visit_until": {"type": "string", "description": "Restaurant planned end time HH:MM on the same day."},
                                 "visit_time": {"type": "string", "description": "HH:MM in Tashkent, only if the caller requested a time"},
                                 "phone": {"type": "string", "description": "Phone number only if provided"},
-                            }, "required": ["car", "issue", "service", "wants_visit", "send_telegram"],
+                            }, "required": ["car", "issue", "service", "wants_visit"],
                         },
                     ) for action in ("save_details", "finish_call")],
                 ])],
                 speech_config=types.SpeechConfig(
                     voice_config=types.VoiceConfig(
-                        prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name="Charon"),
+                        prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice),
                     ),
                 ),
-                system_instruction=outbound["prompt"] if outbound else (
+                system_instruction=(outbound["prompt"] if outbound else (
                     f"Today in Tashkent: {datetime.now(UZ).date().isoformat()}.\n"
-                    + Path(__file__).with_name("operator-prompt.md").read_text(encoding="utf-8-sig")
-                ),
+                    + operator_prompt(business)
+                )) + "\n" + VOICE_STYLE + "\n" + LANGUAGE_STYLE,
             ),
         ) as session:
-            print("Gemini Live connected. Requesting greeting...", flush=True)
+            print(f"Gemini Live connected ({model}, {voice}, {business}).", flush=True)
             await session.send_realtime_input(
-                text=outbound["greeting"] if outbound else "Say only: Assalomu alaykum, avtoservis AI yordamchisiman. Nima muammo bo'ldi?"
+                text=outbound["greeting"] if outbound else f"Faqat shu gapni ayting: Assalomu alaykum. {profile.greeting}"
             )
 
             outgoing = bytearray()
@@ -100,7 +168,6 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
             turn_complete = False
             finished = asyncio.Event()
             saved = None
-            followup = False
             ending = False
             goodbye_audio = False
             transcript = []
@@ -108,10 +175,16 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
 
             caller_speaking = False
 
+            def save_transcript():
+                if request_id and saved is None and transcript:
+                    save_transcript_note(request_id, " ".join(transcript)[:1000])
+
             async def upload():
                 nonlocal caller_speaking
-                lead = deque(maxlen=8)
+                lead = deque(maxlen=20)
                 speech_samples = silence_samples = 0
+                if playback_gate is not None:
+                    await playback_gate.wait()
                 while True:
                     pcm = to_gemini(await incoming.get())
                     samples = array("h", pcm)
@@ -130,13 +203,13 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
 
                     await session.send_realtime_input(audio=types.Blob(data=pcm, mime_type="audio/pcm;rate=16000"))
                     silence_samples = 0 if voiced else silence_samples + len(samples)
-                    if silence_samples >= 7200:
+                    if silence_samples >= END_OF_SPEECH_SAMPLES:
                         caller_speaking = False
                         speech_samples = silence_samples = 0
                         await session.send_realtime_input(activity_end=types.ActivityEnd())
 
             async def receive():
-                nonlocal turn_complete, saved, followup, ending, goodbye_audio, outbound_answer
+                nonlocal turn_complete, saved, ending, goodbye_audio, outbound_answer
                 outbound_result = {}
                 announced = False
                 while True:
@@ -153,22 +226,31 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                         ending = True
                                     result = outbound_result
                                 elif not outbound and call.name == "quote":
-                                    label, low, high = TARIFFS.get(service, TARIFFS["diagnostic"])
+                                    label, low, high = TARIFFS[service if service in services else default_service]
                                     worker, duration = staff(label)
+                                    day = str(args.get("date") or "")
+                                    requested_time = str(args.get("time") or "")
+                                    exact = f"{day}T{requested_time}" if day and requested_time else None
+                                    error = check_slot(label, exact, request_id) if exact else None
                                     result = {"service": label, "min_uzs": low, "max_uzs": high,
-                                              "worker": worker, "minutes": duration,
-                                              "free_slots": available_slots(label, str(args.get("date") or ""), request_id)[:36]}
+                                              "resource": worker, "minutes": duration, "deposit_uzs": deposit_for(label),
+                                              "checked_date": day or None,
+                                              "requested_slot": exact, "requested_slot_available": not error if exact else None,
+                                              "unavailable_reason": error,
+                                              "free_slots": available_slots(label, day, request_id)[:36]}
                                 elif call.name in ("save_details", "finish_call"):
-                                    ending = call.name == "finish_call"
-                                    if str(args.get("issue", "")).strip():
+                                    confirmed, guests, until, missing = booking_fields(args, business)
+                                    ending = call.name == "finish_call" and (not missing or args.get("wants_visit") is not True)
+                                    if str(args.get("issue", "")).strip() and (confirmed or not saved or not saved[1]):
                                         saved = save_request(
                                             caller_id, username, str(args.get("car") or "Noma'lum")[:100],
-                                            str(args["issue"])[:1000], service if service in TARIFFS else "diagnostic",
-                                            args.get("wants_visit") is True, str(args.get("phone") or "")[:40],
+                                            str(args["issue"])[:1000], service if service in services else default_service,
+                                            confirmed, str(args.get("phone") or "")[:40],
                                             request_id=request_id, visit_time=str(args.get("visit_time") or ""),
-                                            visit_date=str(args.get("visit_date") or ""),
+                                            visit_date=str(args.get("visit_date") or ""), business=business,
+                                            guests=guests, visit_until=until,
+                                            menu_items=args.get("menu_items") if isinstance(args.get("menu_items"), list) else None,
                                         )
-                                        followup = args.get("send_telegram") is True
                                     reason = str(args.get("callback_reason") or "").strip()
                                     if request_id:
                                         record_contact_preferences(
@@ -178,7 +260,13 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                     if request_id and reason:
                                         queue_callback(request_id, reason[:300])
                                     result = {"saved": saved is not None}
-                                    if ending:
+                                    if saved:
+                                        result["saved_visit"] = saved[1]
+                                        if saved[1] and "T" in saved[1]:
+                                            result["availability_error"] = check_slot(saved[2], saved[1], request_id)
+                                    if missing:
+                                        result["instruction"] = missing
+                                    elif ending:
                                         result["instruction"] = "Say goodbye now."
                                 else:
                                     result = {"error": "Unknown action"}
@@ -203,16 +291,23 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                     if ending:
                                         goodbye_audio = True
                                     outgoing.extend(to_telegram(part.inline_data.data))
+                                    if greeting_ready is not None and len(outgoing) >= 960 * PLAYBACK_BUFFER_FRAMES:
+                                        greeting_ready.set()
                                     audio_ready.set()
 
                         if content.turn_complete:
+                            save_transcript()
+                            if greeting_ready is not None and outgoing:
+                                greeting_ready.set()
                             turn_complete = True
                             audio_ready.set()
 
             async def playback():
                 frame_bytes = 960
-                prebuffer = frame_bytes * 12
+                prebuffer = frame_bytes * PLAYBACK_BUFFER_FRAMES
                 loop = asyncio.get_running_loop()
+                if playback_gate is not None:
+                    await playback_gate.wait()
                 while True:
                     await audio_ready.wait()
                     audio_ready.clear()
@@ -235,7 +330,5 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                     for task in running:
                         task.cancel()
             finally:
-                if request_id and saved is None and transcript:
-                    save_request(caller_id, username, "", " ".join(transcript)[:1000],
-                                 None, False, request_id=request_id)
-            return outbound_answer if outbound else saved if followup else None
+                save_transcript()
+            return outbound_answer if outbound else None

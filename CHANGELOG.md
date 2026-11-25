@@ -1,8 +1,16 @@
-﻿# O‘zgarishlar tarixi
+# O‘zgarishlar tarixi
+
+## v0.4 · Beshta xizmat va restoran bronlari
+
+- Beshta yo‘nalish bitta dashboardda, har birining alohida kalendari, xizmatlari, narxlari va AI savollari bor.
+- Restoranda xona, mehmonlar soni, kelish va tugash vaqti hamda taomlar ro‘yxati qayd qilinadi. Xodim menyuni tahrirlaydi va omonatni qayd qiladi.
+- AI mijoz aytgan aniq soatni tekshiradi va saqlashdan oldin bron tafsilotlarini qayta o‘qiydi. Dashboardda vaqti yo‘q murojaatga xodim bo‘sh vaqt belgilay oladi.
+- Gemini 3.8 Live, Puck ovozi, oldindan tayyorlanadigan salom va tezroq audio ijrosi. Suhbat tillari o‘zbekcha, ruscha va inglizcha bilan cheklandi.
+- Kunduz va tun rejimlari, haqiqiy restoran dashboardi skrinshotlari va yangilangan demo materiallari.
 
 ## v0.3 · Ko‘p tilli yordamchi va demo materiallari
 
-- Gemini Live mijozning tilini suhbatdan aniqlaydi. Til suhbat davomida o‘zgarsa, javob ham moslashadi. Saqlangan til keyingi ovozli qo‘ng‘iroqlarda ishlatiladi. Inglizcha va ruscha javoblar sinov audiosi bilan tekshirildi. Gemini Live hujjatida 70 til ko‘rsatilgan.
+- Gemini Live mijozning tilini suhbatdan aniqlaydi. Til suhbat davomida o‘zgarsa, javob ham moslashadi. Saqlangan til keyingi ovozli qo‘ng‘iroqlarda ishlatiladi. Inglizcha va ruscha javoblar sinov audiosi bilan tekshirildi.
 - Har bir yangi vaqt taklifi o‘z tasdiqlash kodini oladi. Eski xabarga javob yangi taklifni band qilib yubormaydi. Suhbat qayta ishlanganda band qilingan xizmat va tarif saqlanadi.
 - Lokal PCM musiqasi sozlangan bo‘lsa, ikkinchi kiruvchi qo‘ng‘iroq kutish rejimiga olinadi. Ixtiyoriy ovozli e’londan so‘ng musiqa takrorlanadi. Birinchi suhbat tugagach, Gemini kutayotgan mijozga ulanadi. Ikki telefon bilan jonli sinov hali o‘tkazilmagan.
 - Respublika yoki biznes miqyosidagi natijalar pilotda o‘lchanadi. README’da qo‘ng‘iroqdan bronga o‘tish, bo‘shagan vaqtni to‘ldirish va xodim vaqti uchun hisoblash usullari bor.

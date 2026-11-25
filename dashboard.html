@@ -2,6 +2,15 @@
 <html lang="uz"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Voice Agency 404 · Avtoservis</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script>
+try {
+  const saved = localStorage.getItem('voice404-theme');
+  document.documentElement.dataset.theme = saved === 'day' || saved === 'night'
+    ? saved : matchMedia('(prefers-color-scheme: light)').matches ? 'day' : 'night';
+} catch {
+  document.documentElement.dataset.theme = 'night';
+}
+</script>
 <style>
 :root {
   color-scheme: dark;
@@ -11,15 +20,36 @@
   --line: #292929;
   --muted: #a5a5a5;
   --ink: #f4f4f4;
+  --inverse: #171717;
+  --interactive: #202020;
+  --hover: #303030;
+  --border-control: #565656;
+  --calendar-head: #1b1b1b;
+  --focus: #fff;
   --mono: "IBM Plex Mono", Consolas, monospace;
   --sans: "Geist", "Segoe UI", sans-serif;
+}
+:root[data-theme=day] {
+  color-scheme: light;
+  --canvas: #eeeeed;
+  --panel: #fff;
+  --raised: #f0f0ef;
+  --line: #d6d6d5;
+  --muted: #545453;
+  --ink: #171716;
+  --inverse: #fff;
+  --interactive: #f5f5f4;
+  --hover: #e5e5e4;
+  --border-control: #929290;
+  --calendar-head: #efefee;
+  --focus: #242424;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--canvas); color: var(--ink); font: 14px/1.5 var(--sans); }
 header, main { width: min(100% - 64px, 1460px); margin-inline: auto; }
 header { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 650; letter-spacing: -.025em; }
-.brand-mark { display: grid; place-items: center; width: 44px; height: 32px; border-radius: 8px; background: var(--ink); color: #141414; font: 600 13px var(--mono); }
+.brand-mark { display: grid; place-items: center; width: 49px; height: 34px; border-radius: 8px; background: var(--ink); color: var(--inverse); font: 600 16px var(--mono); }
 #status { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; color: var(--muted); font-size: 12px; }
 #status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #888; }
 #status[data-live="true"]::before { background: var(--ink); box-shadow: 0 0 0 3px #f4f4f41c; }
@@ -35,29 +65,29 @@ h2 { font-size: 16px; line-height: 1.3; letter-spacing: -.025em; font-weight: 65
 section, aside { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
 .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 15px; border-bottom: 1px solid var(--line); }
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
-button, select, input { min-height: 36px; border: 1px solid #393939; border-radius: 8px; background: #202020; color: var(--ink); font: 550 13px/1.25 var(--sans); padding: 6px 10px; }
+button, select, input { min-height: 36px; border: 1px solid var(--border-control); border-radius: 8px; background: var(--interactive); color: var(--ink); font: 550 13px/1.25 var(--sans); padding: 6px 10px; }
 button, select { cursor: pointer; }
 button { transition: background-color 140ms, border-color 140ms, transform 140ms; }
-button:hover { background: #303030; border-color: #555; }
+button:hover { background: var(--hover); border-color: var(--border-control); }
 button:active { transform: translateY(1px); }
-button:focus-visible, summary:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+button:focus-visible, summary:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 button:disabled { cursor: wait; opacity: .65; }
-#today, .primary { background: var(--ink); border-color: var(--ink); color: #171717; }
-#today:hover, .primary:hover { background: #d8d8d8; border-color: #d8d8d8; }
+#today, .primary { background: var(--ink); border-color: var(--ink); color: var(--inverse); }
+#today:hover, .primary:hover { filter: contrast(.8); }
 #prev, #next { min-width: 36px; font-size: 17px; }
 .schedule, #history { max-height: min(65vh, 690px); overflow: auto; scrollbar-color: #494949 transparent; }
 .grid { display: grid; grid-template-columns: 64px repeat(7, minmax(91px, 1fr)); min-width: 701px; }
-.heading { position: sticky; top: 0; z-index: 1; display: grid; place-content: center; min-height: 52px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: #1b1b1b; text-align: center; }
+.heading { position: sticky; top: 0; z-index: 1; display: grid; place-content: center; min-height: 52px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: var(--calendar-head); text-align: center; }
 .heading[aria-current=date] { box-shadow: inset 0 -2px var(--ink); }
-.heading[aria-pressed=true] { background: var(--ink); color: #171717; }
+.heading[aria-pressed=true] { background: var(--ink); color: var(--inverse); }
 .clock, .slot { min-height: 48px; border-bottom: 1px solid var(--line); padding: 6px; }
 .clock { padding: 8px 7px; }
 .clock, .stamp, .heading:first-child { font: 400 11px/1.4 var(--mono); color: var(--muted); }
 .slot { min-width: 0; border-left: 1px solid var(--line); }
-.slot:hover { background: #1a1a1a; }
+.slot:hover { background: var(--raised); }
 .event { display: block; min-height: 30px; width: 100%; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-size: 12px; border-inline-start: 2px solid #aaa; }
-.event.confirmed { background: #e6e6e6; border-color: #e6e6e6; color: #111; }
-.event.confirmed:hover { background: #fff; }
+.event.confirmed { background: var(--ink); border-color: var(--ink); color: var(--inverse); }
+.event.confirmed:hover { filter: contrast(.8); }
 #history { padding: 0 14px; }
 .empty { padding-block: 18px; }
 details { padding: 12px 0; border-bottom: 1px solid var(--line); }
@@ -86,9 +116,51 @@ dd { margin: 0; overflow-wrap: anywhere; }
   button { transition: none; }
   button:active { transform: none; }
 }
+#businessBar { display:flex; flex-wrap:wrap; gap:8px; margin: 18px 0 24px; }
+#businessBar button { display:inline-flex; align-items:center; gap:8px; }
+#businessBar svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+#businessBar [aria-pressed=true] { color:var(--inverse); background:var(--ink); border-color:var(--ink); }
+#businessBar button:disabled { opacity:.6; }
+#workspaceHero { display:flex; align-items:center; justify-content:space-between; gap:24px; }
+#roomFilters { display:flex; flex-wrap:wrap; gap:6px; }
+#roomFilters:empty { display:none; }
+#roomFilters [aria-pressed=true] { background:var(--ink); color:var(--canvas); border-color:var(--ink); }
+body[data-business=restaurant] #workspaceHero {
+  padding:clamp(20px,4vw,44px); border:1px solid var(--line);
+  border-radius:14px; background:#181817; color:#fafaf8;
+}
+body[data-business=restaurant] #workspaceHero .muted { color:#c9c9c5; }
+body[data-business=restaurant] h1 { font-family:Georgia,serif; font-weight:400; letter-spacing:-.06em; }
+body[data-business=restaurant] #roomFilters button { color:#f4f4f1; background:#262625; border-color:#555553; }
+body[data-business=restaurant] #roomFilters [aria-pressed=true] { color:#171716; background:#f4f4f1; border-color:#f4f4f1; }
+body[data-business=restaurant] #roomFilters button:focus-visible { outline-color:#fff; }
+body[data-business=restaurant] .layout { grid-template-columns:minmax(0, 1fr) minmax(345px, 420px); }
+.menu-block { margin:12px 0; border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel); }
+.menu-block h3 { font-size:14px; margin:0 0 7px; }
+.menu-block ul { margin:0 0 10px; padding-left:20px; overflow-wrap:anywhere; }
+.menu-block textarea { background:var(--raised); color:var(--ink); display:block; width:100%; min-height:72px; resize:vertical; border:1px solid var(--line); border-radius:6px; margin:8px 0; padding:8px; font:inherit; }
+.menu-block details { border-bottom:0; padding-bottom:0; }
+.booking-status { display:inline-block; font:500 11px var(--mono); margin-top:7px; padding:4px 7px; border:1px solid var(--line); border-radius:5px; }
+@media(max-width:1100px) { body[data-business=restaurant] .layout { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:650px) { #workspaceHero { align-items:flex-start; flex-direction:column; } }
+.header-actions { display:flex; gap:10px; align-items:center; }
+.theme-switch { display:flex; gap:3px; padding:3px; border:1px solid var(--line); border-radius:9px; }
+.theme-switch button { min-height:30px; padding:4px 9px; background:transparent; border-color:transparent; }
+.theme-switch button[aria-pressed=true] { background:var(--ink); color:var(--inverse); }
+@media(max-width:540px) {
+  header { height:auto; min-height:64px; padding:10px 0; flex-wrap:wrap; gap:8px; }
+  .header-actions { flex-wrap:wrap; gap:6px; }
+}
 </style>
-<header><span class="brand"><span class="brand-mark">404</span>Voice Agency</span><span id="status" role="status">Ulanmoqda</span></header>
-<main><h1>Avtoservis</h1><p class="muted">Diagnostika jadvali va Telegram qo‘ng‘iroqlari</p>
+<header><span class="brand"><span class="brand-mark">404</span>Voice Agency</span><div class="header-actions">
+<div class="theme-switch" role="group" aria-label="Rang rejimi">
+<button type="button" data-theme-mode="day">Kunduz</button><button type="button" data-theme-mode="night">Tun</button>
+</div><span id="status" role="status">Ulanmoqda</span></div></header>
+<main>
+<nav id="businessBar" aria-label="Qo‘ng‘iroqlar uchun faol xizmat"></nav>
+<div id="workspaceHero"><div><h1 id="businessTitle">Avtoservis</h1><p id="businessSubtitle" class="muted">Bronlar va Telegram qo‘ng‘iroqlari</p></div>
+<div id="roomFilters" role="group" aria-label="Xonalar filtri"></div></div>
+<p id="businessFeedback" class="muted" role="status"></p>
 <div class="metrics" id="metrics"></div>
 <div class="layout">
 <section aria-label="Haftalik kalendar"><div class="bar"><h2 id="week"></h2><div class="controls"><select id="worker" aria-label="Usta"><option value="">Barcha ustalar</option><option>Aziz</option><option>Bekzod</option></select><button id="prev" aria-label="Oldingi hafta">←</button> <button id="today">Bugun</button> <button id="next" aria-label="Keyingi hafta">→</button></div></div>
@@ -97,6 +169,17 @@ dd { margin: 0; overflow-wrap: anywhere; }
 </div></main>
 <script>
 const el = id => document.getElementById(id);
+const themeButtons = [...document.querySelectorAll('[data-theme-mode]')];
+function setTheme(mode) {
+  document.documentElement.dataset.theme=mode;
+  for(const button of themeButtons) button.setAttribute('aria-pressed',String(button.dataset.themeMode===mode));
+}
+for(const button of themeButtons) button.addEventListener('click',()=>{
+  const mode=button.dataset.themeMode;
+  setTheme(mode);
+  try { localStorage.setItem('voice404-theme',mode); } catch {}
+});
+setTheme(document.documentElement.dataset.theme);
 const today = new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tashkent'}).format(new Date());
 const dateKey = date => [date.getFullYear(),date.getMonth()+1,date.getDate()].map(n=>String(n).padStart(2,'0')).join('-');
 const daysFrom = (date, days) => {const copy = new Date(date); copy.setDate(copy.getDate()+days); return copy;};
@@ -106,7 +189,68 @@ const monday = daysFrom(current,-((current.getDay()+6)%7));
 const dateLabel = new Intl.DateTimeFormat('uz-Latn-UZ',{day:'numeric',month:'short'});
 const dayLabel = new Intl.DateTimeFormat('uz-Latn-UZ',{weekday:'short',day:'numeric'});
 const money = new Intl.NumberFormat('uz-UZ');
-let cursor = monday, selected = '', rows = [], last = '';
+let cursor = monday, selected = '', rows = [], allRows = [], last = '';
+let profile = {id:'auto',name:'Avtoservis',resource:'Usta',resources:['Aziz','Bekzod'],services:[],opens:9,closes:18};
+const iconPaths = {
+  auto:'M3 16v-4l2-2 2-5h10l2 5 2 2v4H3z M5 16v2 M19 16v2 M6 13h2 M16 13h2 M5 10h14',
+  restaurant:'M5 3v7m4-7v7m-4-3h4m-2 3v11 M18 3c-3 3-4 6-4 9h4m0-9v18',
+  beauty:'M6 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 13a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M9 8l12 11 M9 16 21 5',
+  repair:'M7 3h10v18H7z M10 5h4 M11 18h2',
+  photo:'M3 7h4l2-3h6l2 3h4v13H3z M12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8z'
+};
+function icon(id) {
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg'), path=document.createElementNS(ns,'path');
+  svg.setAttribute('viewBox','0 0 24 24');
+  svg.setAttribute('aria-hidden','true');
+  path.setAttribute('d',iconPaths[id]);
+  svg.append(path);
+  return svg;
+}
+async function loadBusiness() {
+  const response=await fetch('/api/business');
+  if(!response.ok) throw new Error('Xizmatlar yuklanmadi.');
+  const {active,profiles}=await response.json();
+  const bar=el('businessBar');
+  function show(next) {
+    profile=next;
+    document.body.dataset.business=next.id;
+    document.title='Voice Agency 404 ? '+next.name;
+    el('businessSubtitle').textContent=next.id==='restaurant'?'Stol, xona va banket bronlari':'Bronlar va Telegram qo‘ng‘iroqlari';
+    selected='';
+    el('businessTitle').textContent=next.name;
+    el('worker').setAttribute('aria-label',next.resource);
+    el('worker').replaceChildren(new Option('Hammasi',''),...next.resources.map(value=>new Option(value)));
+    el('roomFilters').replaceChildren(...(next.id==='restaurant'?['',...next.resources]:[]).map(room=>{
+      const button=node('button',room || 'Barcha xonalar');
+      button.dataset.room=room;
+      button.onclick=()=>{el('worker').value=room;render();};
+      return button;
+    }));
+    rows=allRows.filter(row=>row.business===next.id);
+    for(const button of bar.children) button.setAttribute('aria-pressed',String(button.dataset.id===next.id));
+    render();
+  }
+  bar.replaceChildren(...profiles.map(next=>{
+    const button=node('button',next.name);
+    button.prepend(icon(next.id));
+    button.dataset.id=next.id;
+    button.onclick=async()=>{
+      if(next.id===profile.id) return;
+      for(const item of bar.children) item.disabled=true;
+      try {
+        const response=await fetch('/api/business',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({business:next.id})});
+        if(!response.ok) throw new Error('Yo‘nalish saqlanmadi.');
+        show(next);
+        el('businessFeedback').textContent='Keyingi qo‘ng‘iroq: '+next.name;
+      } catch(error) { el('businessFeedback').textContent=error.message; }
+      finally { for(const item of bar.children) item.disabled=false; }
+    };
+    return button;
+  }));
+  show(profiles.find(item=>item.id===active));
+}
 const calendarDate = row => row.previous_slot || (row.status === "accepted" ? row.slot : row.status ? row.created : row.visit || row.created);
 const dayOf = row => calendarDate(row).slice(0,10);
 const timeOf = row => calendarDate(row).slice(11,16);
@@ -123,9 +267,9 @@ async function decide(row, action, output, slot) {
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({id:row.id,action,slot,worker:action==='assign'?slot:undefined})
     });
-    const result=await response.json();
+    const result=await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(result.error || 'Amal bajarilmadi.');
-    output.textContent=action==='assign'?'Usta tayinlandi.':action==='callback_done'?'Vazifa yopildi.':'Saqlandi. Telegram xabari yuboriladi.';
+    output.textContent=action==='save_menu'?'Menyu saqlandi.':action==='set_service'?'Xizmat saqlandi.':action==='deposit_paid'?'Omonat qayd qilindi.':action==='assign'?profile.resource+' tanlandi.':action==='callback_done'?'Vazifa yopildi.':'Saqlandi. Telegram xabari yuboriladi.';
   } catch(error) {
     output.textContent=error.message;
   }
@@ -143,20 +287,36 @@ function actions(row) {
     };
     return control;
   };
-  if(row.issue && !['accepted','offered'].includes(row.status)) {
-    const worker=node('select');
-    worker.setAttribute('aria-label','Murojaat ustasi');
-    worker.append(node('option','Aziz'),node('option','Bekzod'));
-    worker.value=row.worker;
-    panel.append(worker,button('Ustani tayinlash','assign',()=>worker.value));
+  const serviceKnown=profile.services.some(item=>item.label===row.service);
+  if(row.issue && !['accepted','offered'].includes(row.status) && row.delivery!=='queued') {
+    const service=node('select');
+    service.setAttribute('aria-label','Xizmat turi');
+    service.append(new Option('Xizmat tanlang',''),...profile.services.map(item=>
+      new Option(profile.resource==='Xona'?item.label+' · '+item.resource:item.label,item.id)));
+    service.value=profile.services.find(item=>item.label===row.service)?.id || '';
+    panel.append(service,button('Xizmatni saqlash','set_service',()=>service.value));
+    if(serviceKnown && !['restaurant','photo'].includes(profile.id)) {
+      const worker=node('select');
+      worker.setAttribute('aria-label',profile.resource);
+      worker.append(...profile.resources.map(value=>new Option(value)));
+      worker.value=row.worker;
+      panel.append(worker,button(profile.resource+'ni tanlash','assign',()=>worker.value));
+    }
+  }
+  const awaitingDeposit=row.deposit && !row.deposit_paid;
+  if(awaitingDeposit) {
+    panel.append(node('p','Bronni tasdiqlash uchun '+money.format(row.deposit)+' so‘m omonat kerak. To‘lovni olgan bo‘lsangiz, quyidagi tugmani bosing.','callback'));
+    panel.append(button('Omonat olinganini qayd qilish','deposit_paid'));
   }
   if(row.callback && !row.callback_done) panel.append(button('Qayta aloqa bajarildi','callback_done'));
   if(row.delivery==='failed') panel.append(button('Xabarni qayta yuborish','retry'));
-  if(!row.issue || (row.status==='accepted' && !row.move_requested) || row.delivery==='queued') {
+  if(!row.issue || !serviceKnown || (row.status==='accepted' && !row.move_requested) || row.delivery==='queued') {
     panel.append(output);
     return panel;
   }
-  if(row.visit?.includes('T') && !row.status) panel.append(button('Qabul qilish','accept'));
+  const requestedTime = row.visit?.includes('T') && Date.parse(row.visit+'+05:00')>Date.now();
+  if(requestedTime && !row.status && !awaitingDeposit)
+    panel.append(button('Qabul qilish','accept',()=>row.visit));
   if(!['rejected','accepted'].includes(row.status) && !row.previous_slot) panel.append(button('Rad etish','reject'));
   const availability=node('details');
   availability.append(node('summary','Bo‘sh vaqt'));
@@ -164,7 +324,7 @@ function actions(row) {
   dateInput.type='date';
   dateInput.min=today;
   dateInput.value=row.visit?.slice(0,10)>=today?row.visit.slice(0,10):today;
-  dateInput.setAttribute('aria-label','Taklif sanasi');
+  dateInput.setAttribute('aria-label','Bron yoki taklif sanasi');
   const timeInput=node('select');
   timeInput.setAttribute('aria-label','Bo‘sh soat');
   const populate=()=>{
@@ -173,27 +333,62 @@ function actions(row) {
         [item.slot,item.previous_slot].filter(Boolean).map(slot=>({
           start:Date.parse(slot+'+05:00'),minutes:item.duration
         })));
+    const previous=timeInput.value || row.visit;
     timeInput.replaceChildren();
-    for(let i=18;i<36;i++) {
+    for(let i=profile.opens*2;i<profile.closes*2;i++) {
       const time=String(Math.floor(i/2)).padStart(2,'0')+(i%2?':30':':00');
       const slot=dateInput.value+'T'+time;
       const start=Date.parse(slot+'+05:00'),end=start+row.duration*60000;
-      if(start>Date.now() && i*30+row.duration<=1080 &&
+      if(start>Date.now() && i*30+row.duration<=profile.closes*60 &&
         !busy.some(booked=>start<booked.start+booked.minutes*60000 && booked.start<end)) {
         const option=node('option',time);
         option.value=slot;
         timeInput.append(option);
       }
     }
+    if(Array.from(timeInput.options).some(option=>option.value===previous)) timeInput.value=previous;
   };
   dateInput.onchange=populate;
   populate();
-  availability.append(dateInput,timeInput,button('Vaqt taklif qilish','offer',()=>timeInput.value));
+  availability.append(dateInput,timeInput);
+  if(!awaitingDeposit) availability.append(button('Vaqt taklif qilish','offer',()=>timeInput.value));
+  if(!awaitingDeposit && (!row.status || ['rejected','cancelled'].includes(row.status))) {
+    availability.append(button('Shu vaqtga qabul qilish','accept',()=>timeInput.value || 'invalid'));
+    if(!requestedTime) availability.open=true;
+  }
   panel.append(availability,output);
   return panel;
 }
+function restaurantMenu(row) {
+  const block=node('div','','menu-block');
+  block.append(node('h3','Tanlangan menyu'));
+  const items=row.menu_items || [];
+  if(items.length) {
+    const list=node('ul');
+    list.append(...items.map(item=>node('li',item)));
+    block.append(list);
+  } else {
+    block.append(node('p','Taomlar hali qayd qilinmagan.','muted'));
+  }
+  const editor=node('details');
+  const input=node('textarea');
+  input.setAttribute('aria-label','Tanlangan taomlar');
+  input.placeholder='Har qatorga bitta taom';
+  input.value=items.join('\n');
+  const save=node('button','Menyuni saqlash'), status=node('p','','muted');
+  status.setAttribute('role','status');
+  save.onclick=async()=>{
+    save.disabled=true;
+    try { await decide(row,'save_menu',status,input.value.split('\n').map(item=>item.trim()).filter(Boolean).slice(0,30)); }
+    finally { save.disabled=false; }
+  };
+  editor.append(node('summary','Menyuni tahrirlash'),input,save,status);
+  block.append(editor);
+  return block;
+}
 function render(openId) {
   const history = el('history'), calendar = el('calendar');
+  for(const button of el('roomFilters').children) button.setAttribute('aria-pressed',String(button.dataset.room===el('worker').value));
   const opened = new Set(Array.from(history.querySelectorAll('details[open]'),item=>item.dataset.id));
   if(openId) opened.add(openId);
   const days = Array.from({length:7},(_,index)=>daysFrom(cursor,index));
@@ -231,7 +426,7 @@ function render(openId) {
     if(el('worker').value && row.worker!==el('worker').value) continue;
     const time = timeOf(row), slot = slots.get(dayOf(row)+'/'+(time.slice(0,2)||'Vaqtsiz'));
     if(!slot) continue;
-    const event = node('button',[time,row.car||row.service].filter(Boolean).join(' '),'event');
+    const event = node('button',[time,profile.id==='auto'?(row.car||row.service):(row.service+' · '+row.worker)].filter(Boolean).join(' '),'event');
     if(row.status==='accepted'||row.previous_slot) event.classList.add('confirmed');
     event.onclick=()=>{selected=dayOf(row);render(row.id);document.getElementById('call-'+row.id).querySelector('summary').focus();};
     slot.append(event);
@@ -243,25 +438,34 @@ function render(openId) {
   for(const row of visible) {
     const card=node('details'), summary=node('summary',[row.car,row.service].filter(Boolean).join(' · '));
     card.id='call-'+row.id; card.dataset.id=row.id; card.open=opened.has(row.id);
+    if(profile.id==='restaurant') summary.append(node('span',
+      row.status==='accepted'?'Tasdiqlangan':row.deposit && !row.deposit_paid?'Omonat kutilmoqda':
+      row.status==='offered'?'Mijoz javobi kutilmoqda':row.status==='rejected'?'Rad etilgan':
+      row.status==='cancelled'?'Bekor qilingan':'Yangi so‘rov','booking-status'));
     summary.append(node('span',row.created.slice(0,16).replace('T',' '),'stamp'));
     card.append(summary,node('p',row.issue||'Qo‘ng‘iroq qayd qilindi. Tafsilotlar kutilmoqda.','issue'));
     const fields=node('dl');
     for(const [label,value] of [
-      ['Diagnostika',(row.slot||row.visit)?.replace('T',' ') || '-'],
+      ['Tashrif',(row.slot||row.visit)?.replace('T',' ') || '-'],
+      ...(profile.id==='restaurant' ? [['Mehmonlar',row.guests ? row.guests+' kishi' : 'Aniqlanmagan'],
+        ['Nechigacha',row.visit_until || 'Aniqlanmagan']] : []),
       ['Holat',({cancelled:'Bekor qilindi',accepted:'Qabul qilindi',rejected:'Rad etildi',offered:'Mijoz javobi kutilmoqda'})[row.status] || 'So‘rov'],
       ['Xabar',({queued:'Navbatda',sent:'Yuborildi',failed:'Yuborilmadi'})[row.delivery] || '-'],
       ['Narx',row.low?money.format(row.low)+'–'+money.format(row.high)+' so‘m':'Aniqlanmagan'],
       ['Telegram',row.username?'@'+row.username:'ID '+row.caller_id],
-      ['Usta',row.worker+' · '+row.duration+' daqiqa'+(row.assigned_worker?'':' · Tavsiya')],
+      [profile.resource,row.worker+' · '+row.duration+' daqiqa'+(row.assigned_worker?'':' · Tavsiya')],
       ['Kelishi',({calling:'Qo‘ng‘iroq ketmoqda',coming:'Kelyapti',cannot_come:'Kela olmaydi',unclear:'Aniqlanmadi',no_answer:'Javob olmadi'})[row.attendance] || '-'],
       ['Qo‘ng‘iroq',row.consent?'Rozilik bor':'Rozilik yo‘q'],
       ['Kutish navbati',row.waitlist?'Qo‘shilgan':'Qo‘shilmagan'],
+      ...(row.deposit ? [['Omonat',money.format(row.deposit)+' so‘m · '+(row.deposit_paid?'Qayd qilindi':'Kutilmoqda')]] : []),
       ['Telefon',row.phone||'Berilmagan']
     ]) fields.append(node('dt',label),node('dd',value));
     if(row.move_requested) card.append(node('p','Mijoz vaqtni ko‘chirishni so‘radi.','callback'));
     if(row.previous_slot) card.append(node('p','Eski bron saqlangan: '+row.previous_slot.replace('T',' '),'callback'));
     if(row.callback) card.append(node('p',(row.callback_done?'Qayta aloqa bajarildi: ':'Usta qayta qo‘ng‘iroq qilsin: ')+row.callback,'callback'));
-    card.append(fields,actions(row)); history.append(card);
+    card.append(fields);
+    if(profile.id==='restaurant') card.append(restaurantMenu(row));
+    card.append(actions(row)); history.append(card);
   }
 }
 el('worker').onchange=()=>render();
@@ -274,7 +478,7 @@ async function refresh() {
     const response=await fetch('/api/requests');
     if(!response.ok) throw new Error('Server unavailable');
     const payload=await response.text();
-    if(payload!==last){rows=JSON.parse(payload);last=payload;render();}
+    if(payload!==last){allRows=JSON.parse(payload);rows=allRows.filter(row=>row.business===profile.id);last=payload;render();}
     el('status').dataset.live='true';
     el('status').textContent='Lokal · Ulangan';
   } catch {el('status').dataset.live='false';el('status').textContent='Aloqa uzildi';}
@@ -282,6 +486,7 @@ async function refresh() {
 }
 render();
 el('schedule').scrollTop=230;
+loadBusiness().catch(error=>{el('businessFeedback').textContent=error.message;});
 refresh();
 </script>
 </html>

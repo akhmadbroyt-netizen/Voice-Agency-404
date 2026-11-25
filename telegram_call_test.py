@@ -10,10 +10,10 @@ from telethon import TelegramClient, events
 from threading import Thread
 from webbrowser import open as open_browser
 
-from gemini_voice import talk
+from gemini_voice import SUPPORTED_LANGUAGES, talk
 from hold_audio import play_hold
 from service_desk import (
-    PORT, attendance_result, book_opening, claim_attendance_call, confirm_offer,
+    PORT, active_business, attendance_result, business_for, deposit_for, book_opening, claim_attendance_call, confirm_offer,
     dashboard_server, delivery_result, pending_messages, request_move, save_request,
     waitlist_candidates,
 )
@@ -46,26 +46,22 @@ async def main():
         received_audio = False
         incoming = asyncio.Queue(maxsize=100)
 
-        async def run_voice(peer_id):
+        async def run_voice(peer_id, playback_gate, greeting_ready):
             nonlocal voice_task
             try:
                 username = None
                 try:
-                    peer = await client.get_entity(peer_id)
+                    peer = await asyncio.wait_for(client.get_entity(peer_id), 0.25)
                     username = getattr(peer, "username", None)
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, TimeoutError):
                     print("Telegram username unavailable; keeping the caller ID.", flush=True)
-                request_id, *_ = save_request(peer_id, username, "", "", None, False)
+                business = active_business()
+                request_id, *_ = save_request(peer_id, username, "", "", None, False, business=business)
                 print(f"Call recorded: {request_id}", flush=True)
-                followup = await talk(calls, peer_id, incoming, config, username, request_id)
+                await talk(calls, peer_id, incoming, config, username, request_id, business=business,
+                                      playback_gate=playback_gate, greeting_ready=greeting_ready)
                 voice_task = None
                 await calls.leave_call(peer_id)
-                if followup:
-                    request_id, date, service, low, high = followup
-                    message = f"Murojaat {request_id}. {service}: taxminan {low:,} - {high:,} so'm."
-                    if date:
-                        message += f" {date.replace(chr(84), chr(32))} uchun diagnostika so'rovi qabul qilindi. Usta vaqtni tasdiqlaydi."
-                    await client.send_message(peer_id, message)
             except Exception as error:
                 if isinstance(error, ExceptionGroup):
                     error = error.exceptions[0]
@@ -73,7 +69,8 @@ async def main():
                 code = getattr(error, "code", None)
                 if isinstance(code, int):
                     print(f"Gemini error code: {code}", flush=True)
-                if connected:
+                await playback_gate.wait()
+                if connected and caller_id == peer_id:
                     await calls.leave_call(peer_id)
 
         async def start_inbound(peer_id, already_joined=False):
@@ -83,15 +80,28 @@ async def main():
             received_audio = False
             while not incoming.empty():
                 incoming.get_nowait()
+            playback_gate = asyncio.Event()
+            greeting_ready = asyncio.Event()
+            task = asyncio.create_task(run_voice(peer_id, playback_gate, greeting_ready))
+            voice_task = task
             try:
                 if not already_joined:
+                    try:
+                        await asyncio.wait_for(greeting_ready.wait(), 1.5)
+                    except TimeoutError:
+                        print("Greeting still preparing; answering Telegram.", flush=True)
+                    if not connected or caller_id != peer_id:
+                        return
                     await calls.play(peer_id, Stream(microphone=AudioStream(MediaSource.EXTERNAL, "")))
-                await calls.record(peer_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
                 if connected and caller_id == peer_id:
-                    voice_task = asyncio.create_task(run_voice(peer_id))
+                    await calls.record(peer_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
+                    playback_gate.set()
             except Exception:
+                task.cancel()
                 if caller_id == peer_id:
                     connected = False
+                    if voice_task is task:
+                        voice_task = None
                 raise
 
         async def hold_caller(peer_id):
@@ -176,9 +186,11 @@ async def main():
             received_audio = False
             while not incoming.empty():
                 incoming.get_nowait()
-            language = job.get("language") or "uz"
+            language = job.get("language")
+            if language not in SUPPORTED_LANGUAGES:
+                language = "uz"
             prompt = (
-                f"You are the auto service AI assistant. Start in language code {language}. "
+                f"You are the {business_for(job['service']).name} AI assistant. Start in language code {language}. "
                 "If the customer speaks another language, reply in that language. "
                 "Ask only the question in the greeting. After the caller clearly answers, "
                 "call outbound_result with yes or no. If still ambiguous after one follow-up, "
@@ -224,11 +236,12 @@ async def main():
                     attendance_result(job, outcome)
                     return {"instruction": "Rahmat, javobingizni qayd qildim. Salomat bo'ling."}
 
-                await outbound_call(job, f"Assalomu alaykum, avtoservis AI yordamchisiman. "
-                                    f"{job['worker']} usta sizni kutyapti. Ustaxonaga kelyapsizmi?", attendance)
+                profile = business_for(job["service"])
+                await outbound_call(job, f"Assalomu alaykum, {profile.name} AI yordamchisiman. "
+                                    f"{job['service']} uchun tashrifingiz bor. Kelyapsizmi?", attendance)
                 if outcome == "no_answer":
                     attendance_result(job, outcome)
-                if outcome != "cannot_come":
+                if outcome != "cannot_come" or deposit_for(job["service"]):
                     continue
                 for candidate in waitlist_candidates(job):
                     if connected:
@@ -244,9 +257,9 @@ async def main():
                             if booked else "Rahmat, vaqt band qilinmadi. Salomat bo'ling."
                         )}
 
-                    await outbound_call(candidate, f"Assalomu alaykum, avtoservis AI yordamchisiman. "
-                                        f"{job['worker']} usta hozir bo'shadi. Yaqin vaqtda kelib "
-                                        "mashinangizni tekshirtirmoqchimisiz?", accept_opening)
+                    await outbound_call(candidate, f"Assalomu alaykum, {profile.name} AI yordamchisiman. "
+                                        f"{job['service']} uchun vaqt bo‘shadi. Yaqin vaqtda kela olasizmi?",
+                                        accept_opening)
                     if booked:
                         break
 
