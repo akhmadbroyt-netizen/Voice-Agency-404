@@ -97,7 +97,7 @@ O‘zbekcha, ruscha va inglizcha. AI qisqa o‘zbekcha salomdan keyin mijoz gapi
 
 ## Video va texnik taqdimot
 
-[Final PDF](docs/final-pitch.pdf) · [Final video (2:00)](docs/404-final.mp4) · [Texnik pitch](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
+[Final PDF](docs/final-pitch.pdf) · [Final video · Full HD, 60 fps, 2:00](https://drive.google.com/file/d/16a6_jTmgM1yKxtNCdHnX1BpOeBiPLaJs/view) · [GitHub’dagi video nusxasi (720p)](docs/404-final.mp4) · [Texnik pitch](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
 
 Final videoda 404 jamoasi prototipni qo‘ng‘iroqdan kalendargacha ko‘rsatadi. Restoran sahnasida haqiqiy dashboard demo ma’lumotlari bilan ishlatilgan.
 

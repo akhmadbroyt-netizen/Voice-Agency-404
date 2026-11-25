@@ -8,6 +8,8 @@
 - Gemini 3.8 Live, Puck ovozi, oldindan tayyorlanadigan salom va tezroq audio ijrosi. Suhbat tillari o‘zbekcha, ruscha va inglizcha bilan cheklandi.
 - Kunduz va tun rejimlari, haqiqiy restoran dashboardi skrinshotlari va yangilangan demo materiallari.
 
+Final video 2:00 davom etadi va 60 fps’da qayta montaj qilindi. Taqdimotning oxirgi slaydidan Full HD videoni ochish mumkin.
+
 ## v0.3 · Ko‘p tilli yordamchi va demo materiallari
 
 - Gemini Live mijozning tilini suhbatdan aniqlaydi. Til suhbat davomida o‘zgarsa, javob ham moslashadi. Saqlangan til keyingi ovozli qo‘ng‘iroqlarda ishlatiladi. Inglizcha va ruscha javoblar sinov audiosi bilan tekshirildi.
