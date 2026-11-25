@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="uz">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voice Agency 404 · Texnik pitch</title>
+<style>
+:root{color-scheme:dark;--paper:#0b0b0b;--ink:#f1f1f1;--muted:#b4b4b4;--line:#383838;--pad:clamp(18px,6vw,110px);--sans:"Segoe UI",system-ui,sans-serif;--mono:Consolas,monospace}
+*{box-sizing:border-box}
+html{height:100%;overflow-x:hidden;scroll-snap-type:y mandatory;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:clamp(14px,1.65vw,24px)/1.45 var(--sans)}
+.slide{height:100vh;height:100dvh;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;border-bottom:1px solid var(--line)}
+.content{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:clamp(14px,5vh,76px) var(--pad) clamp(52px,10vh,104px);max-width:1650px;margin:auto}
+p,h1,h2,h3,figure,blockquote{margin:0}h1,h2,h3{line-height:1.02;letter-spacing:-.065em;font-weight:650;text-wrap:balance}
+h1{font-size:clamp(56px,11vw,168px)}h2{font-size:clamp(34px,6.4vw,100px);max-width:1100px}h3{font-size:clamp(20px,2.7vw,38px)}
+.lead{color:var(--muted);max-width:760px;margin-top:clamp(9px,2.2vh,30px)}
+.label{font:500 clamp(10px,1.1vw,15px)/1.2 var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:clamp(8px,2.5vh,26px)}
+.light{background:#ededed;color:#121212;--muted:#444;--line:#b8b8b8}.light a{color:#151515}
+.title-layout{display:grid;grid-template-columns:1.2fr .8fr;align-items:end;gap:18px}
+.mark{font:500 clamp(80px,24vw,380px)/.68 var(--mono);letter-spacing:-.17em;color:transparent;-webkit-text-stroke:1px #777;white-space:nowrap;justify-self:end}
+.rule{border-top:1px solid var(--line);margin-top:clamp(14px,4vh,50px);padding-top:clamp(8px,2vh,24px)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,2vw,34px)}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.item{border-top:1px solid var(--line);padding-top:clamp(6px,1.5vh,18px)}.item p{color:var(--muted);margin-top:4px}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:clamp(12px,4vh,38px)}
+.flow div{background:var(--paper);padding:clamp(7px,2vw,30px);font-weight:600}.flow small{display:block;color:var(--muted);font:clamp(10px,1vw,15px) var(--mono);margin-bottom:5px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,5vw,84px);align-items:center}
+.quote{border-left:2px solid currentColor;padding-left:clamp(9px,2vw,25px);font-size:clamp(16px,2.5vw,39px);line-height:1.2}
+.quote + .quote{margin-top:clamp(10px,3vh,28px)}
+.mock{border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:clamp(12px,1.35vw,18px)}
+.mock div{padding:clamp(6px,1.4vh,16px) clamp(9px,2vw,22px);border-bottom:1px solid var(--line)}.mock div:last-child{border:0}.mock b{font-family:var(--mono)}
+.big{font:600 clamp(38px,7vw,104px)/1 var(--mono);letter-spacing:-.1em}
+a{color:var(--ink);text-underline-offset:4px}.links{display:flex;flex-wrap:wrap;gap:12px 22px;margin-top:clamp(9px,3vh,30px);font-size:clamp(12px,1.5vw,22px)}
+.controls{position:fixed;z-index:3;bottom:12px;right:var(--pad);display:flex;align-items:center;gap:5px;color:#f5f5f5;background:#171717;border:1px solid #444;border-radius:10px;padding:4px;font:12px var(--mono)}
+.controls button{min-width:32px;min-height:32px;border:0;border-radius:6px;background:transparent;color:inherit;cursor:pointer;font:inherit}.controls button:hover{background:#363636}button:focus-visible,a:focus-visible{outline:2px solid #999;outline-offset:3px}.controls output{padding-inline:6px}
+.progress{height:3px;background:#858585;position:fixed;z-index:4;inset:auto 0 0;transform-origin:left;transition:transform 280ms ease}
+.waves{display:flex;align-items:center;gap:4px;height:34px;margin-top:clamp(6px,2vh,24px)}.waves i{display:block;width:3px;height:var(--h);background:#888;transform-origin:center}
+@media (prefers-reduced-motion:no-preference){.slide.active .reveal{animation:enter 540ms both cubic-bezier(.2,.75,.2,1)}.slide.active .reveal:nth-child(2){animation-delay:65ms}.slide.active .reveal:nth-child(3){animation-delay:135ms}.slide.active .waves i{animation:voice 1.4s 3 alternate ease-in-out;animation-delay:var(--delay)}}
+@keyframes enter{from{opacity:.12;transform:translateY(18px)}to{opacity:1;transform:none}}@keyframes voice{50%{transform:scaleY(.28)}}
+@media(max-width:650px) and (orientation:portrait){.title-layout,.split{grid-template-columns:1fr}.mark{justify-self:start;font-size:38vw;margin-top:15px}.grid{grid-template-columns:1fr}.grid.two{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr 1fr}.content{gap:0}.quote{font-size:16px}}
+@media(max-height:470px){h1{font-size:clamp(45px,9vw,80px)}h2{font-size:clamp(29px,5.5vw,62px)}.content{padding-top:12px;padding-bottom:50px}.mark{font-size:25vw}.waves{height:18px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.progress{transition:none}}
+.say{border-left:2px solid var(--line);margin-top:clamp(9px,3vh,30px);padding-left:12px;color:var(--muted);font-size:clamp(12px,1.4vw,19px);max-width:860px}.say strong{color:currentColor;font:600 .78em var(--mono);text-transform:uppercase;letter-spacing:.09em;margin-right:8px}.item h3{font:600 clamp(14px,2vw,29px)/1.2 var(--mono);letter-spacing:-.045em;overflow-wrap:anywhere}.item p{font-size:clamp(13px,1.6vw,22px)}@media(max-width:650px) and (orientation:portrait){.grid.two{grid-template-columns:1fr}.rule{margin-top:12px}.item{padding-top:6px}}
+</style>
+<body>
+<main>
+<section class="slide"><div class="content">
+<p class="label reveal">Texnik pitch · 404 jamoasi</p><h2 class="reveal">Kod qanday ishlaydi?</h2><p class="lead reveal">Bitta Telegram qo‘ng‘irog‘idan boshlab, usta jadvaliga tushadigan tashrifgacha.</p>
+<div class="grid rule reveal"><div class="item"><h3>Ovoz</h3><p>Telegram va Gemini Live</p></div><div class="item"><h3>Ma’lumot</h3><p>Python va SQLite</p></div><div class="item"><h3>Boshqaruv</h3><p>Monochrome dashboard</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Kodimizni bitta mijoz qo‘ng‘irog‘i misolida tushuntiraman.</p>
+</div></section>
+<section class="slide light"><div class="content">
+<p class="label reveal">Ishga tushirish</p><h2 class="reveal">Bitta start fayli</h2><p class="lead reveal">start-demo.bat → telegram_login.py → telegram_call_test.py</p>
+<div class="grid two rule reveal"><div class="item"><h3>start-demo.bat</h3><p>Python muhitini yaratadi, paketlarni o‘rnatadi va demoni ochadi.</p></div><div class="item"><h3>telegram_login.py</h3><p>Lokal API sozlamalarini tekshiradi va Telegram sessiyasini yaratadi.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Start faylini bosganimizda robot ham, brauzerdagi dashboard ham ishga tushadi.</p>
+</div></section>
+<section class="slide"><div class="content">
+<p class="label reveal">01 · Telegram</p><h2 class="reveal">Qo‘ng‘iroqni kim ko‘taradi?</h2><p class="lead reveal">telegram_call_test.py</p>
+<div class="grid two rule reveal"><div class="item"><h3>on_update()</h3><p>Kiruvchi qo‘ng‘iroqni taniydi va bo‘sh bo‘lsa avtomatik ko‘taradi.</p></div><div class="item"><h3>run_voice()</h3><p>Murojaat qaydini ochadi va audio navbatini Gemini’ga ulaydi.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Telefon ovozi shu fayldan AI’ga boradi, javob esa o‘sha qo‘ng‘iroqqa qaytadi.</p>
+</div></section>
+<section class="slide"><div class="content">
+<p class="label reveal">02 · AI ovozi</p><h2 class="reveal">Gemini qanday gaplashadi?</h2><p class="lead reveal">gemini_voice.py · operator-prompt.md</p>
+<div class="grid rule reveal"><div class="item"><h3>talk()</h3><p>Gemini Live sessiyasini ochadi, audio yuboradi va javobni qaytaradi.</p></div><div class="item"><h3>operator-prompt.md</h3><p>O‘zbekcha suhbat, bitta savol, taxminiy narx va xayrlashish qoidalari.</p></div><div class="item"><h3>Ovoz navbati</h3><p>Mijoz gap boshlasa, AI’ning navbatdagi audio javobi to‘xtatiladi.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Mijoz Cobalt va tormoz muammosini aytsa, AI faqat kerakli aniqlikni so‘raydi.</p>
+</div></section>
+<section class="slide light"><div class="content">
+<p class="label reveal">03 · AI amallari</p><h2 class="reveal">AI buyurtmani qanday yozadi?</h2><p class="lead reveal">gemini_voice.py Gemini amallarini Python funksiyalariga ulaydi.</p>
+<div class="grid rule reveal"><div class="item"><h3>quote</h3><p>Tarif, xizmat davomiyligi va bo‘sh vaqtlarni backenddan oladi.</p></div><div class="item"><h3>save_details</h3><p>Model, muammo va tashrif so‘rovini bir xil qaydga yozadi.</p></div><div class="item"><h3>finish_call</h3><p>Tafsilotlarni yakunlaydi, AI xayrlashadi va qo‘ng‘iroq yopiladi.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> AI narxni tarifdan oladi. Mijoz tanlagan vaqt dastlab tasdiq kutadigan so‘rov bo‘ladi.</p>
+</div></section>
+<section class="slide"><div class="content">
+<p class="label reveal">04 · Baza</p><h2 class="reveal">Bron qayerda saqlanadi?</h2><p class="lead reveal">service_desk.py · lokal SQLite</p>
+<div class="grid rule reveal"><div class="item"><h3>save_request()</h3><p>Qo‘ng‘iroq qaydini yaratadi yoki yangi tafsilotlar bilan yangilaydi.</p></div><div class="item"><h3>decide()</h3><p>Usta tayinlash, qabul qilish, rad etish va boshqa vaqt taklifini saqlaydi.</p></div><div class="item"><h3>slot_available()</h3><p>Xizmat davomiyligi bo‘yicha bir ustaning vaqtlari to‘qnashishini tekshiradi.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Saytda qabul qilsak, backend vaqt hali bo‘shligini qayta tekshiradi.</p>
+</div></section>
+<section class="slide light"><div class="content">
+<p class="label reveal">05 · Dashboard</p><h2 class="reveal">Sayt ma’lumotni qayerdan oladi?</h2><p class="lead reveal">dashboard.html</p>
+<div class="grid two rule reveal"><div class="item"><h3>GET /api/requests</h3><p>Kalendar, qo‘ng‘iroq tarixi va hisobot uchun ma’lumot beradi.</p></div><div class="item"><h3>POST /api/decision</h3><p>Usta tanlovi va tashrif bo‘yicha qarorni serverga yuboradi.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Kalendar kartasida mashina, muammo, taxminiy narx, usta va Telegram kontakti ko‘rinadi.</p>
+</div></section>
+<section class="slide"><div class="content">
+<p class="label reveal">06 · Tashrifdan oldin</p><h2 class="reveal">Mijoz kelolmasa nima bo‘ladi?</h2><p class="lead reveal">telegram_call_test.py · service_desk.py</p>
+<div class="grid rule reveal"><div class="item"><h3>send_notices()</h3><p>Tasdiq, vaqt taklifi va tashrif eslatmasini Telegram’ga yuboradi.</p></div><div class="item"><h3>scheduled_calls()</h3><p>Rozilik bo‘lsa, kelishini so‘raydi. Mijoz kelolmasa, navbatdagi rozi mijozga taklif qiladi.</p></div><div class="item"><h3>book_opening()</h3><p>Mijoz rozi bo‘lsa, bo‘sh vaqtni tekshiradi va band qiladi.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Chiquvchi oqim lokal testdan o‘tgan. Haqiqiy telefonda to‘liq sinov hali ochiq.</p>
+</div></section>
+<section class="slide"><div class="content">
+<p class="label reveal">Demo yakuni</p><h2 class="reveal">Hakamga nimani ko‘rsataman?</h2><p class="lead reveal">Qo‘ng‘iroq → AI savoli → calendar → usta tasdig‘i</p>
+<div class="grid two rule reveal"><div class="item"><h3>Hozir</h3><p>Jonli kiruvchi qo‘ng‘iroq va ishchi dashboard. Kalitlar lokal .env faylida.</p></div><div class="item"><h3>Keyin</h3><p>n8n yoki CRM bilan boshqa xizmat jarayonlarini ulash va audio sifatini yaxshilash.</p></div></div>
+<p class="say"><strong>Sahnada ayting</strong> Bu prototipda usta qo‘ng‘iroq bilan band bo‘lmaydi. Kelgan murojaatni kalendardan boshqaradi.</p>
+</div></section>
+</main>
+<nav class="controls" aria-label="Slayd boshqaruvi"><button id="prev" aria-label="Oldingi slayd">←</button><output id="count">01 / 09</output><button id="next" aria-label="Keyingi slayd">→</button><button id="full" aria-label="To‘liq ekran">⛶</button></nav>
+<div class="progress" aria-hidden="true"></div>
+<script>
+class Presentation {
+  constructor() {
+    this.slides=[...document.querySelectorAll('.slide')];
+    this.index=0;
+    this.go(0);
+    const observer=new IntersectionObserver(entries=>{
+      for(const entry of entries) if(entry.isIntersecting) this.show(this.slides.indexOf(entry.target));
+    },{threshold:.65});
+    this.slides.forEach(slide=>observer.observe(slide));
+    document.querySelector('#prev').onclick=()=>this.go(this.index-1);
+    document.querySelector('#next').onclick=()=>this.go(this.index+1);
+    document.querySelector('#full').onclick=()=>this.fullscreen();
+    document.addEventListener('keydown',event=>{
+      if(event.altKey||event.ctrlKey||event.metaKey||event.target.closest('button,a')) return;
+      const key=event.key;
+      if(key.toLowerCase()==='f') return this.fullscreen();
+      const target=key==='Home'?0:key==='End'?this.slides.length-1:
+        ['ArrowRight','ArrowDown','PageDown',' '].includes(key)?this.index+1:
+        ['ArrowLeft','ArrowUp','PageUp'].includes(key)?this.index-1:null;
+      if(target!==null){event.preventDefault();this.go(target);}
+    });
+  }
+  show(index) {
+    this.index=index;
+    for(const [i,slide] of this.slides.entries()) slide.classList.toggle('active',i===index);
+    const count=n=>String(n).padStart(2,'0');
+    document.querySelector('#count').value=count(index+1)+' / '+count(this.slides.length);
+    document.querySelector('.progress').style.transform='scaleX('+((index+1)/this.slides.length)+')';
+  }
+  go(index) {
+    index=Math.max(0,Math.min(index,this.slides.length-1));
+    this.show(index);
+    this.slides[index].scrollIntoView({block:'start',behavior:'instant'});
+  }
+  fullscreen() {
+    if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+    else document.documentElement.requestFullscreen().catch(()=>{});
+  }
+}
+new Presentation();
+</script>
+</body></html>

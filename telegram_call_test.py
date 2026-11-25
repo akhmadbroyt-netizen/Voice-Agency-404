@@ -11,6 +11,7 @@ from threading import Thread
 from webbrowser import open as open_browser
 
 from gemini_voice import talk
+from hold_audio import play_hold
 from service_desk import (
     PORT, attendance_result, book_opening, claim_attendance_call, confirm_offer,
     dashboard_server, delivery_result, pending_messages, request_move, save_request,
@@ -20,6 +21,10 @@ from service_desk import (
 
 async def main():
     root = Path(__file__).resolve().parent
+    music_file = root / ".data" / "hold-music.pcm"
+    announcement_file = root / ".data" / "hold-announcement.pcm"
+    music = music_file.read_bytes() if music_file.is_file() else b""
+    announcement = announcement_file.read_bytes() if announcement_file.is_file() else b""
     config = dotenv_values(root / ".env", encoding="utf-8-sig", interpolate=False)
     if not config.get("GEMINI_API_KEY"):
         raise SystemExit("Set GEMINI_API_KEY in .env.")
@@ -34,6 +39,8 @@ async def main():
         if not account:
             raise SystemExit("Telegram session expired. Run start-demo.bat again.")
         caller_id = None
+        waiting_id = None
+        waiting_task = None
         voice_task = None
         connected = False
         received_audio = False
@@ -69,34 +76,73 @@ async def main():
                 if connected:
                     await calls.leave_call(peer_id)
 
+        async def start_inbound(peer_id, already_joined=False):
+            nonlocal caller_id, connected, received_audio, voice_task
+            caller_id = peer_id
+            connected = True
+            received_audio = False
+            while not incoming.empty():
+                incoming.get_nowait()
+            try:
+                if not already_joined:
+                    await calls.play(peer_id, Stream(microphone=AudioStream(MediaSource.EXTERNAL, "")))
+                await calls.record(peer_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
+                if connected and caller_id == peer_id:
+                    voice_task = asyncio.create_task(run_voice(peer_id))
+            except Exception:
+                if caller_id == peer_id:
+                    connected = False
+                raise
+
+        async def hold_caller(peer_id):
+            nonlocal waiting_id, waiting_task
+            try:
+                await calls.play(peer_id, Stream(microphone=AudioStream(MediaSource.EXTERNAL, "")))
+                print("Second caller is on hold.", flush=True)
+                await play_hold(calls, peer_id, announcement, music,
+                                lambda: waiting_id == peer_id and connected)
+                if waiting_id == peer_id and not connected:
+                    waiting_id = None
+                    waiting_task = None
+                    await start_inbound(peer_id, already_joined=True)
+            except Exception as error:
+                print(f"Waiting call failed ({type(error).__name__}).", flush=True)
+                try:
+                    await calls.leave_call(peer_id)
+                except Exception as cleanup_error:
+                    print(f"Waiting call cleanup failed ({type(cleanup_error).__name__}).", flush=True)
+            finally:
+                if waiting_id == peer_id:
+                    waiting_id = None
+                    waiting_task = None
+
         @calls.on_update()
         async def on_update(app, update):
-            nonlocal caller_id, connected, received_audio, voice_task
-            if connected and update.chat_id != caller_id:
-                return
+            nonlocal connected, waiting_id, waiting_task, received_audio, voice_task
+            peer_id = update.chat_id
             if isinstance(update, ChatUpdate):
-                if update.status & ChatUpdate.Status.INCOMING_CALL and not connected:
-                    caller_id = update.chat_id
-                    connected = True
-                    received_audio = False
-                    while not incoming.empty():
-                        incoming.get_nowait()
-                    try:
-                        print("Test call received. Connecting audio...", flush=True)
-                        await app.play(caller_id, Stream(microphone=AudioStream(MediaSource.EXTERNAL, "")))
-                        await app.record(caller_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
-                        if connected:
-                            voice_task = asyncio.create_task(run_voice(caller_id))
-                    except Exception:
+                if update.status & ChatUpdate.Status.INCOMING_CALL:
+                    if not connected and waiting_id is None:
+                        await start_inbound(peer_id)
+                    elif music and waiting_id is None and peer_id != caller_id:
+                        waiting_id = peer_id
+                        waiting_task = asyncio.create_task(hold_caller(peer_id))
+                elif update.status & ChatUpdate.Status.LEFT_CALL:
+                    if peer_id == waiting_id:
+                        waiting_id = None
+                        if waiting_task:
+                            waiting_task.cancel()
+                            waiting_task = None
+                    elif connected and peer_id == caller_id:
                         connected = False
-                        raise
-                elif connected and update.status & ChatUpdate.Status.LEFT_CALL:
-                    connected = False
-                    if voice_task and not voice_task.done() and voice_task is not asyncio.current_task():
-                        voice_task.cancel()
-                        voice_task = None
-                    print("Call ended. Waiting for another test call.", flush=True)
-            elif (
+                        if voice_task and not voice_task.done() and voice_task is not asyncio.current_task():
+                            voice_task.cancel()
+                            voice_task = None
+                        print("Call ended.", flush=True)
+                return
+            if peer_id != caller_id:
+                return
+            if (
                 connected
                 and isinstance(update, StreamFrames)
                 and update.direction == Direction.INCOMING
@@ -165,7 +211,7 @@ async def main():
         async def scheduled_calls():
             while True:
                 await asyncio.sleep(3)
-                if connected:
+                if connected or waiting_id is not None:
                     continue
                 job = claim_attendance_call()
                 if not job:

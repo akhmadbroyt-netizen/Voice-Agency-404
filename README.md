@@ -96,3 +96,20 @@ Robot qisqa o‘zbekcha salomdan boshlaydi, keyin suhbatni mijoz gapirayotgan ti
 Google hujjatida **Gemini Live API 70 ta tilda suhbatni qo‘llashi** ko‘rsatilgan. Bu model imkoniyati. Prototipning barcha 70 tilida Telegram orqali alohida sinov o‘tkazilmagan. Dashboard va avtomatik yozma Telegram xabarlari o‘zbekcha. [Gemini Live API](https://ai.google.dev/gemini-api/docs/live)
 
 Inglizcha va ruscha sinov audiosi Gemini Live sessiyasiga uzatildi va javob audiosi tegishli tilda qaytdi.
+
+## Video va texnik taqdimot
+
+[Commercial V2 (MP4, 540p)](docs/voice-agency-404-v2.mp4) · [Texnik pitch (HTML)](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
+
+Videoda 404 jamoasi 25-noyabr hakaton prototipini qo‘ng‘iroqdan kalendargacha ko‘rsatadi. Texnik pitch kod fayllari va Telegram, Gemini Live, SQLite hamda dashboard o‘rtasidagi bog‘lanishni tushuntiradi. HTML faylini yuklab olib brauzerda oching.
+
+## Ikkinchi kiruvchi qo‘ng‘iroq uchun kutish musiqasi
+
+Demo bitta faol va bitta kutayotgan kiruvchi qo‘ng‘iroqqa mo‘ljallangan. Kutishni yoqish uchun ishlatishga ruxsatingiz bo‘lgan audioni 48 kHz, 16-bit, mono PCM formatga aylantiring va robotni qayta ishga tushiring.
+
+```powershell
+New-Item -ItemType Directory -Force .data
+ffmpeg -i "musiqa.mp3" -ar 48000 -ac 1 -f s16le .data/hold-music.pcm
+```
+
+Boshlang‘ich e’lon uchun ikkinchi audioni shu formatda `.data/hold-announcement.pcm` qilib saqlang. `hold_audio.py` e’lonni bir marta o‘qiydi va musiqani suhbatga ulashgacha takrorlaydi. Birinchi mijoz yakunlagach, robot kutayotgan mijozga Gemini Live’ni ulaydi. Ikki telefon bilan jonli sinov hali o‘tkazilmagan.
