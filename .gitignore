@@ -1,0 +1,10 @@
+.env
+/.venv/
+/.telegram/
+/__pycache__/
+/.data/
+.env.*
+!.env.example
+*.session
+*.session-journal
+__pycache__/
