@@ -8,7 +8,7 @@ from google import genai
 from google.genai import types
 from pytgcalls.types import Device
 
-from service_desk import TARIFFS, UZ, save_request
+from service_desk import TARIFFS, UZ, available_slots, queue_callback, record_contact_preferences, save_request, staff
 
 
 def to_gemini(pcm):
@@ -23,7 +23,7 @@ def to_telegram(pcm):
     return array("h", (sample for value in array("h", pcm) for sample in (value, value))).tobytes()
 
 
-async def talk(calls, caller_id, incoming, config, username=None, request_id=None):
+async def talk(calls, caller_id, incoming, config, username=None, request_id=None, outbound=None):
     async with genai.Client(
         api_key=config["GEMINI_API_KEY"],
         http_options=types.HttpOptions(api_version="v1beta"),
@@ -37,13 +37,20 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                     activity_handling="START_OF_ACTIVITY_INTERRUPTS",
                 ),
                 input_audio_transcription=types.AudioTranscriptionConfig(),
-                tools=[types.Tool(function_declarations=[
+                tools=[types.Tool(function_declarations=[types.FunctionDeclaration(
+                    name="outbound_result",
+                    description="Report the explicit customer answer and finish the call.",
+                    parameters_json_schema={"type": "object", "properties": {
+                        "answer": {"type": "string", "enum": ["yes", "no", "unclear"]},
+                    }, "required": ["answer"]},
+                )])] if outbound else [types.Tool(function_declarations=[
                     types.FunctionDeclaration(
                         name="quote",
-                        description="Get estimated demo labor prices in Uzbek sums.",
+                        description="Get price, assigned technician, duration and free times for a service.",
                         parameters_json_schema={
                             "type": "object", "properties": {
                                 "service": {"type": "string", "enum": list(TARIFFS)},
+                                "date": {"type": "string", "description": "Requested date YYYY-MM-DD"},
                             }, "required": ["service"],
                         },
                     ),
@@ -61,6 +68,9 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                 "service": {"type": "string", "enum": list(TARIFFS)},
                                 "wants_visit": {"type": "boolean", "description": "Caller explicitly requested a diagnostic visit"},
                                 "send_telegram": {"type": "boolean", "description": "Caller explicitly agreed to receive a Telegram message"},
+                                "allow_call": {"type": "boolean", "description": "Explicit consent to a later Telegram call"},
+                                "join_waitlist": {"type": "boolean", "description": "Explicit request to be called if an earlier appointment opens"},
+                                "callback_reason": {"type": "string", "description": "Reason staff should call, when requested or human help is needed"},
                                 "visit_date": {"type": "string", "description": "Requested date in YYYY-MM-DD"},
                                 "visit_time": {"type": "string", "description": "HH:MM in Tashkent, only if the caller requested a time"},
                                 "phone": {"type": "string", "description": "Phone number only if provided"},
@@ -73,7 +83,7 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                         prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name="Charon"),
                     ),
                 ),
-                system_instruction=(
+                system_instruction=outbound["prompt"] if outbound else (
                     f"Today in Tashkent: {datetime.now(UZ).date().isoformat()}.\n"
                     + Path(__file__).with_name("operator-prompt.md").read_text(encoding="utf-8-sig")
                 ),
@@ -81,7 +91,7 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
         ) as session:
             print("Gemini Live connected. Requesting greeting...", flush=True)
             await session.send_realtime_input(
-                text="Say only: Assalomu alaykum, avtoservis AI yordamchisiman. Nima muammo bo'ldi?"
+                text=outbound["greeting"] if outbound else "Say only: Assalomu alaykum, avtoservis AI yordamchisiman. Nima muammo bo'ldi?"
             )
 
             outgoing = bytearray()
@@ -93,6 +103,7 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
             ending = False
             goodbye_audio = False
             transcript = []
+            outbound_answer = None
 
             caller_speaking = False
 
@@ -124,7 +135,8 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                         await session.send_realtime_input(activity_end=types.ActivityEnd())
 
             async def receive():
-                nonlocal turn_complete, saved, followup, ending, goodbye_audio
+                nonlocal turn_complete, saved, followup, ending, goodbye_audio, outbound_answer
+                outbound_result = {}
                 announced = False
                 while True:
                     async for response in session.receive():
@@ -133,9 +145,18 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                             for call in response.tool_call.function_calls:
                                 args = call.args or {}
                                 service = args.get("service")
-                                if call.name == "quote":
+                                if outbound and call.name == "outbound_result":
+                                    if not ending:
+                                        outbound_answer = args.get("answer", "unclear")
+                                        outbound_result = outbound["answer"](outbound_answer)
+                                        ending = True
+                                    result = outbound_result
+                                elif not outbound and call.name == "quote":
                                     label, low, high = TARIFFS.get(service, TARIFFS["diagnostic"])
-                                    result = {"service": label, "min_uzs": low, "max_uzs": high}
+                                    worker, duration = staff(label)
+                                    result = {"service": label, "min_uzs": low, "max_uzs": high,
+                                              "worker": worker, "minutes": duration,
+                                              "free_slots": available_slots(label, str(args.get("date") or ""), request_id)[:36]}
                                 elif call.name in ("save_details", "finish_call"):
                                     ending = call.name == "finish_call"
                                     if str(args.get("issue", "")).strip():
@@ -147,6 +168,11 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                             visit_date=str(args.get("visit_date") or ""),
                                         )
                                         followup = args.get("send_telegram") is True
+                                    reason = str(args.get("callback_reason") or "").strip()
+                                    if request_id:
+                                        record_contact_preferences(request_id, args.get("allow_call"), args.get("join_waitlist"))
+                                    if request_id and reason:
+                                        queue_callback(request_id, reason[:300])
                                     result = {"saved": saved is not None}
                                     if ending:
                                         result["instruction"] = "Say goodbye now."
@@ -199,7 +225,7 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                         finished.set()
 
             try:
-                async with asyncio.timeout(300), asyncio.TaskGroup() as tasks:
+                async with asyncio.timeout(55 if outbound else 300), asyncio.TaskGroup() as tasks:
                     running = [tasks.create_task(fn()) for fn in (upload, receive, playback)]
                     await finished.wait()
                     for task in running:
@@ -208,4 +234,4 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                 if request_id and saved is None and transcript:
                     save_request(caller_id, username, "", " ".join(transcript)[:1000],
                                  None, False, request_id=request_id)
-            return saved if followup else None
+            return outbound_answer if outbound else saved if followup else None

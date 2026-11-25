@@ -12,7 +12,9 @@ from webbrowser import open as open_browser
 
 from gemini_voice import talk
 from service_desk import (
-    PORT, confirm_offer, dashboard_server, delivery_result, pending_messages, save_request,
+    PORT, attendance_result, book_opening, claim_attendance_call, confirm_offer,
+    dashboard_server, delivery_result, pending_messages, request_move, save_request,
+    waitlist_candidates,
 )
 
 
@@ -113,10 +115,92 @@ async def main():
             if not event.is_private or not event.sender_id:
                 return
             words = event.raw_text.casefold().translate(str.maketrans("", "", "'’‘ʻʼ")).strip(" .!").split()
-            if not words or words[0] not in ("boladi", "ha") or len(words) > 2:
+            if not words or len(words) > 2:
                 return
             token = words[1] if len(words) == 2 else None
-            confirm_offer(event.sender_id, event.reply_to_msg_id, token)
+            if words[0] in ("kochir", "kechikaman"):
+                request_move(event.sender_id, event.reply_to_msg_id, token)
+            elif words[0] in ("boladi", "ha"):
+                confirm_offer(event.sender_id, event.reply_to_msg_id, token)
+
+        async def outbound_call(job, greeting, answer):
+            nonlocal caller_id, connected, received_audio, voice_task
+            caller_id = job["caller_id"]
+            connected = True
+            received_audio = False
+            while not incoming.empty():
+                incoming.get_nowait()
+            prompt = (
+                "You are the avtoservis AI assistant. Speak briefly in Uzbek. "
+                "Ask only the question in the greeting. After the caller clearly answers, "
+                "call outbound_result with yes or no. If still ambiguous after one follow-up, "
+                "report unclear. Speak the instruction the tool returns, then say goodbye. "
+                "Never say a time was booked unless the tool confirms it."
+            )
+            try:
+                await asyncio.wait_for(
+                    calls.play(caller_id, Stream(microphone=AudioStream(MediaSource.EXTERNAL, ""))), 35,
+                )
+                if not connected:
+                    return
+                await calls.record(caller_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
+                voice_task = asyncio.create_task(talk(calls, caller_id, incoming, config, outbound={
+                    "prompt": prompt, "greeting": greeting, "answer": answer,
+                }))
+                await asyncio.gather(voice_task, return_exceptions=True)
+            except Exception as error:
+                print(f"Scheduled Telegram call failed ({type(error).__name__}).", flush=True)
+            finally:
+                voice_task = None
+                try:
+                    if connected:
+                        await calls.leave_call(caller_id)
+                except Exception as error:
+                    print(f"Could not close scheduled call ({type(error).__name__}).", flush=True)
+                finally:
+                    connected = False
+
+        async def scheduled_calls():
+            while True:
+                await asyncio.sleep(3)
+                if connected:
+                    continue
+                job = claim_attendance_call()
+                if not job:
+                    continue
+                outcome = "no_answer"
+
+                def attendance(answer):
+                    nonlocal outcome
+                    outcome = {"yes": "coming", "no": "cannot_come"}.get(answer, "unclear")
+                    attendance_result(job, outcome)
+                    return {"instruction": "Rahmat, javobingizni qayd qildim. Salomat bo'ling."}
+
+                await outbound_call(job, f"Assalomu alaykum, avtoservis AI yordamchisiman. "
+                                    f"{job['worker']} usta sizni kutyapti. Ustaxonaga kelyapsizmi?", attendance)
+                if outcome == "no_answer":
+                    attendance_result(job, outcome)
+                if outcome != "cannot_come":
+                    continue
+                for candidate in waitlist_candidates(job):
+                    if connected:
+                        break
+                    booked = None
+
+                    def accept_opening(answer):
+                        nonlocal booked
+                        if answer == "yes":
+                            booked = book_opening(candidate, job)
+                        return {"instruction": (
+                            f"{booked.replace('T', ' ')} ga yozildingiz. Telegramdan tasdiq keladi."
+                            if booked else "Rahmat, vaqt band qilinmadi. Salomat bo'ling."
+                        )}
+
+                    await outbound_call(candidate, f"Assalomu alaykum, avtoservis AI yordamchisiman. "
+                                        f"{job['worker']} usta hozir bo'shadi. Yaqin vaqtda kelib "
+                                        "mashinangizni tekshirtirmoqchimisiz?", accept_opening)
+                    if booked:
+                        break
 
         async def send_notices():
             while True:
@@ -133,9 +217,9 @@ async def main():
                         message = await client.send_message(peer, notice["notice"])
                     except Exception as error:
                         print(f"Telegram notification failed ({type(error).__name__}).", flush=True)
-                        delivery_result(notice["request_id"])
+                        delivery_result(notice["request_id"], kind=notice["kind"])
                     else:
-                        delivery_result(notice["request_id"], message.id)
+                        delivery_result(notice["request_id"], message.id, notice["kind"])
                 await asyncio.sleep(1)
 
         await calls.start()
@@ -147,11 +231,13 @@ async def main():
             print("Auto-answer active. Press Ctrl+C to stop.", flush=True)
             open_browser(url)
             notices = asyncio.create_task(send_notices())
+            scheduled = asyncio.create_task(scheduled_calls())
             try:
                 await client.disconnected
             finally:
                 notices.cancel()
-                await asyncio.gather(notices, return_exceptions=True)
+                scheduled.cancel()
+                await asyncio.gather(notices, scheduled, return_exceptions=True)
                 server.shutdown()
     finally:
         await client.disconnect()
