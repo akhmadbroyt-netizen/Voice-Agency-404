@@ -130,11 +130,13 @@ async def main():
             received_audio = False
             while not incoming.empty():
                 incoming.get_nowait()
+            language = job.get("language") or "uz"
             prompt = (
-                "You are the avtoservis AI assistant. Speak briefly in Uzbek. "
+                f"You are the auto service AI assistant. Start in language code {language}. "
+                "If the customer speaks another language, reply in that language. "
                 "Ask only the question in the greeting. After the caller clearly answers, "
                 "call outbound_result with yes or no. If still ambiguous after one follow-up, "
-                "report unclear. Speak the instruction the tool returns, then say goodbye. "
+                "report unclear. Translate the returned instruction into the customer language, then say goodbye. "
                 "Never say a time was booked unless the tool confirms it."
             )
             try:
@@ -145,7 +147,7 @@ async def main():
                     return
                 await calls.record(caller_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
                 voice_task = asyncio.create_task(talk(calls, caller_id, incoming, config, outbound={
-                    "prompt": prompt, "greeting": greeting, "answer": answer,
+                    "prompt": prompt, "greeting": f"Say this in language code {language}: {greeting}", "answer": answer,
                 }))
                 await asyncio.gather(voice_task, return_exceptions=True)
             except Exception as error:

@@ -5,7 +5,7 @@
 ![Windows](https://img.shields.io/badge/DEMO-WINDOWS-black?style=flat-square)
 ![License MIT](https://img.shields.io/badge/LICENSE-MIT-555?style=flat-square)
 
-**404 jamoasi yaratgan o‘zbekcha ovozli avtoservis yordamchisi.** Mijoz Telegram orqali qo‘ng‘iroq qiladi. AI muammoni eshitadi, ustaga kerakli tafsilotlarni so‘raydi va tashrif so‘rovini kalendarga yozadi. Usta sayt orqali so‘rovni qabul qiladi, rad etadi yoki boshqa vaqt taklif qiladi.
+**404 jamoasi yaratgan o‘zbekcha ovozli avtoservis yordamchisi.** Mijoz Telegram orqali qo‘ng‘iroq qiladi. AI mijozning tiliga moslashadi, muammoni eshitadi, ustaga kerakli tafsilotlarni so‘raydi va tashrif so‘rovini kalendarga yozadi. Usta sayt orqali so‘rovni qabul qiladi, rad etadi yoki boshqa vaqt taklif qiladi.
 
 [Pitch deck](docs/pitch-deck.html) · [Windows ishga tushirgichi](start-demo.bat) · [Demo ssenariysi](#-hakamlar-uchun-sinov)
 
@@ -88,3 +88,11 @@ Prototip hozircha real avtoservisdagi mijoz saqlash foizini isbotlamagan. Pilotd
 - **Xizmat samaradorligi** = kelgan mijozlar ulushi, tasdiqqacha o‘tgan vaqt va xodimning bitta murojaatga sarflagan daqiqalari.
 
 **Hisob namunasi.** Bir haftada 100 ta qo‘ng‘iroq bo‘lib, 20 tasi o‘tkazib yuborilgan deylik. AI o‘sha 20 ta murojaatdan 6 tasini tasdiqlangan tashrifga aylantirsa, bu **6 ta qo‘shimcha bron**. Yana 10 ta bekor qilingan vaqtdan 3 tasi navbat orqali qayta band qilinsa, **3 ta bo‘sh slot to‘lgan** bo‘ladi. Bu ikki ko‘rsatkich alohida yuritiladi, chunki bir mijoz ikkala guruhda ham uchrashi mumkin. Bron va haqiqatan kelgan mijoz ham alohida hisoblanadi.
+
+## Ko‘p tilli ovozli yordamchi
+
+Robot qisqa o‘zbekcha salomdan boshlaydi, keyin suhbatni mijoz gapirayotgan tilga o‘tkazadi. O‘zbekcha, inglizcha va ruscha murojaatlar uchun alohida til tanlash shart emas. Mijoz suhbat davomida tilni almashtirsa, javob tili ham moslashadi. So‘rovda aniqlangan til kodi keyingi AI ovozli qo‘ng‘iroqlari uchun saqlanadi.
+
+Google hujjatida **Gemini Live API 70 ta tilda suhbatni qo‘llashi** ko‘rsatilgan. Bu model imkoniyati. Prototipning barcha 70 tilida Telegram orqali alohida sinov o‘tkazilmagan. Dashboard va avtomatik yozma Telegram xabarlari o‘zbekcha. [Gemini Live API](https://ai.google.dev/gemini-api/docs/live)
+
+Inglizcha va ruscha sinov audiosi Gemini Live sessiyasiga uzatildi va javob audiosi tegishli tilda qaytdi.

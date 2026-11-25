@@ -68,6 +68,7 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                 "service": {"type": "string", "enum": list(TARIFFS)},
                                 "wants_visit": {"type": "boolean", "description": "Caller explicitly requested a diagnostic visit"},
                                 "send_telegram": {"type": "boolean", "description": "Caller explicitly agreed to receive a Telegram message"},
+                                "language": {"type": "string", "description": "Detected customer language, e.g. uz, en, ru"},
                                 "allow_call": {"type": "boolean", "description": "Explicit consent to a later Telegram call"},
                                 "join_waitlist": {"type": "boolean", "description": "Explicit request to be called if an earlier appointment opens"},
                                 "callback_reason": {"type": "string", "description": "Reason staff should call, when requested or human help is needed"},
@@ -170,7 +171,10 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                         followup = args.get("send_telegram") is True
                                     reason = str(args.get("callback_reason") or "").strip()
                                     if request_id:
-                                        record_contact_preferences(request_id, args.get("allow_call"), args.get("join_waitlist"))
+                                        record_contact_preferences(
+                                            request_id, args.get("allow_call"), args.get("join_waitlist"),
+                                            args.get("language"),
+                                        )
                                     if request_id and reason:
                                         queue_callback(request_id, reason[:300])
                                     result = {"saved": saved is not None}

@@ -44,6 +44,9 @@ def database():
         request_id TEXT PRIMARY KEY, worker TEXT, consent INTEGER NOT NULL DEFAULT 0,
         waitlist INTEGER NOT NULL DEFAULT 0, dialed_slot TEXT, attendance TEXT
     )""")
+    connection.execute("""CREATE TABLE IF NOT EXISTS request_languages (
+        request_id TEXT PRIMARY KEY, language TEXT NOT NULL
+    )""")
     required = {"previous_slot": "TEXT", "move_requested": "INTEGER NOT NULL DEFAULT 0",
                 "reminder": "TEXT"}
     columns = {row["name"] for row in connection.execute("PRAGMA table_info(decisions)")}
@@ -311,9 +314,14 @@ def confirm_offer(caller_id, message_id, request_id):
 
 
 
-def record_contact_preferences(request_id, consent=None, waitlist=None):
+def record_contact_preferences(request_id, consent=None, waitlist=None, language=None):
     with closing(database()) as connection, connection:
         connection.execute("INSERT OR IGNORE INTO dispatch(request_id) VALUES (?)", (request_id,))
+        if isinstance(language, str):
+            code = language.lower().split("-")[0]
+            if len(code) in (2, 3) and code.isascii() and code.isalpha():
+                connection.execute("""INSERT INTO request_languages VALUES (?,?)
+                    ON CONFLICT(request_id) DO UPDATE SET language=excluded.language""", (request_id, code))
         if isinstance(consent, bool):
             connection.execute("UPDATE dispatch SET consent=? WHERE request_id=?", (consent, request_id))
         if isinstance(waitlist, bool):
@@ -324,8 +332,9 @@ def claim_attendance_call():
     now = datetime.now(UZ).replace(tzinfo=None)
     with closing(database()) as connection, connection:
         connection.execute("BEGIN IMMEDIATE")
-        row = connection.execute("""SELECT r.id, r.caller_id, r.username, r.service, d.slot
+        row = connection.execute("""SELECT r.id, r.caller_id, r.username, r.service, d.slot, l.language
             FROM decisions d JOIN requests r ON d.request_id=r.id JOIN dispatch x ON x.request_id=r.id
+            LEFT JOIN request_languages l ON l.request_id=r.id
             WHERE d.status='accepted' AND x.consent=1 AND d.slot<=? AND d.slot>=?
             AND x.dialed_slot IS NOT d.slot ORDER BY d.slot LIMIT 1""",
           (now.isoformat(timespec="minutes"), (now-timedelta(minutes=15)).isoformat(timespec="minutes"))).fetchone()
@@ -349,9 +358,10 @@ def attendance_result(job, answer):
 
 def waitlist_candidates(job):
     with closing(database()) as connection:
-        rows = connection.execute("""SELECT r.id, r.caller_id, r.username, r.service, d.slot
+        rows = connection.execute("""SELECT r.id, r.caller_id, r.username, r.service, d.slot, l.language
             FROM requests r JOIN dispatch x ON x.request_id=r.id
             LEFT JOIN decisions d ON d.request_id=r.id
+            LEFT JOIN request_languages l ON l.request_id=r.id
             WHERE r.caller_id<>? AND x.consent=1 AND x.waitlist=1 AND r.service=?
             AND (d.status IS NULL OR d.status='accepted') AND (d.slot IS NULL OR d.slot>?)
             ORDER BY r.created""", (job["caller_id"], job["service"], job["slot"]))
