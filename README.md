@@ -2,131 +2,213 @@
 
 ![404 Team](https://img.shields.io/badge/BUILT%20BY-404%20TEAM-black?style=flat-square)
 ![Hackathon Prototype](https://img.shields.io/badge/STATUS-HACKATHON%20PROTOTYPE-555?style=flat-square)
-![Windows](https://img.shields.io/badge/DEMO-WINDOWS-black?style=flat-square)
-![License MIT](https://img.shields.io/badge/LICENSE-MIT-555?style=flat-square)
+![Version](https://img.shields.io/badge/VERSION-v0.6-black?style=flat-square)
+![Windows](https://img.shields.io/badge/DEMO-WINDOWS-555?style=flat-square)
+![License MIT](https://img.shields.io/badge/LICENSE-MIT-black?style=flat-square)
 
-**404 jamoasi yaratgan o‘zbekcha ovozli avtoservis yordamchisi.** Mijoz Telegram orqali qo‘ng‘iroq qiladi. AI mijozning tiliga moslashadi, muammoni eshitadi, ustaga kerakli tafsilotlarni so‘raydi va tashrif so‘rovini kalendarga yozadi. Usta sayt orqali so‘rovni qabul qiladi, rad etadi yoki boshqa vaqt taklif qiladi.
+**Telegram qo‘ng‘iroqlariga o‘zbek tilida javob beradigan AI xodim.** Mijoz Telegram orqali qo‘ng‘iroq qiladi. AI salomlashadi, muammoni tinglaydi, kerakli savollarni beradi, narxni aytadi, bo‘sh vaqtni tekshiradi va so‘rovni kalendarga yozadi. Xodim dashboard’da so‘rovni qabul qiladi, rad etadi yoki boshqa vaqt taklif qiladi. Mijoz javobni Telegram’da oladi.
 
-[Final taqdimot va video](https://drive.google.com/drive/folders/18oKNS8oeazvJrhctXxpkJiDIkqKZArZ7) · [Kod qo‘llanmasi](docs/CODE.md) · [Pitch deck](docs/pitch-deck.html) · [Windows ishga tushirgichi](start-demo.bat) · [Demo ssenariysi](#-hakamlar-uchun-sinov)
+[🎬 Video (1:28)](https://drive.google.com/file/d/1y3i6GqpcdwkYLAerR32SWI1PhbDxs8sl/view) · [📄 Taqdimot PDF](https://drive.google.com/file/d/1RsMOCRwaQDuzHp2iotwG1XHem5Ruk5No/view) · [📘 Kod qo‘llanmasi](docs/CODE.md) · [▶️ Ishga tushirish](#-ishga-tushirish) · [☎️ Hakamlar uchun sinov](#️-hakamlar-uchun-sinov) · [📝 O‘zgarishlar](CHANGELOG.md)
 
-![Restoran dashboardi, kunduzgi rejim va demo bron](docs/restaurant-day.jpg)
+![Avtoservis dashboardi, tungi rejim: jonli qo‘ng‘iroq paneli, kunlik ko‘rsatkichlar, haftalik kalendar va qo‘ng‘iroqlar tarixi](docs/screens/dashboard-night.jpg)
 
-![Restoran dashboardi, tungi rejim va demo bron](docs/restaurant-night.jpg)
+## Mundarija
 
-## 🎞️ Pitch deck
+1. [Qanday muammoni hal qiladi](#-qanday-muammoni-hal-qiladi)
+2. [Qo‘ng‘iroq qanday o‘tadi](#-qongiroq-qanday-otadi)
+3. [Dashboard](#️-dashboard)
+4. [Beshta yo‘nalish](#-beshta-yonalish)
+5. [Ishga tushirish](#-ishga-tushirish)
+6. [Hakamlar uchun sinov](#️-hakamlar-uchun-sinov)
+7. [Arxitektura va kod](#-arxitektura-va-kod)
+8. [Xavfsizlik va maxfiylik](#-xavfsizlik-va-maxfiylik)
+9. [Natijani qanday o‘lchaymiz](#-natijani-qanday-olchaymiz)
+10. [Cheklovlar](#️-cheklovlar)
+11. [Kelajak rejasi](#️-kelajak-rejasi)
+12. [Video va taqdimot](#-video-va-taqdimot)
 
-[HTML faylini](docs/pitch-deck.html) GitHubʼdan yuklab olib brauzerda oching. **← / →** bilan slaydlarni almashtiring, **F** bilan to‘liq ekranga o‘ting. Sakkiz slaydda muammo, AI qo‘ng‘irog‘i, usta kalendari, kutish navbati, pilot o‘lchovlari va kengaytirish rejasi bor. Slaydlar oflayn ochiladi. Jonli dashboard havolasi lokal demo ishga tushganda ishlaydi.
+## 🎯 Qanday muammoni hal qiladi
 
-## 🎬 Bitta tugma bilan demo
+Kichik biznesda telefonga ko‘pincha xodimning o‘zi javob beradi. Usta mashina tagida, oshpaz oshxonada, sartarosh mijoz bilan band. Shu paytda kelgan qo‘ng‘iroq javobsiz qoladi va mijoz boshqa joyga ketadi.
 
-1. **Python 3.14 x64** va Windows Python Launcher o‘rnatilgan bo‘lsin.
-2. Repozitoriyni klonlang yoki **Code → Download ZIP** orqali yuklab, arxivdan chiqaring.
-3. **`start-demo.bat`** faylini ikki marta bosing. Birinchi ishga tushirishda Python paketlari o‘rnatiladi. Oyna sizdan Gemini kaliti, Telegram API ID va API hash’ni so‘raydi. Telegram API ma’lumotlari [API development tools](https://my.telegram.org) orqali olinadi.
-4. Telegram raqamingizni, kelgan login kodini va kerak bo‘lsa ikki bosqichli tasdiqlash parolini o‘sha oynaga kiriting. Keyingi startlarda lokal sessiya qayta ishlatiladi.
-5. Robot avtomatik qo‘ng‘iroq kutadi va [ishchi dashboard’i](http://127.0.0.1:8744/) brauzerda ochiladi. Ishni tugatganda **Ctrl+C** bosing.
+| Muammo | Voice Agency 404 nima qiladi |
+| --- | --- |
+| Xodim band, qo‘ng‘iroq javobsiz qoladi | AI Telegram qo‘ng‘irog‘ini darhol ko‘taradi va o‘zbekcha gaplashadi. |
+| Muammo, narx va vaqt turli xabarlarda yo‘qoladi | Alomat, model, narx, sana va telefon bitta kartaga yoziladi. |
+| Ustaga ustma-ust ish berib qo‘yiladi | Xizmat davomiyligi bo‘yicha bo‘sh vaqt tekshiriladi. Bir ustaning tashriflari to‘qnashmaydi. |
+| Mijoz kelmay qoladi, vaqt bo‘sh turadi | Bir soat oldin eslatma boradi. Kelolmasa, kutish navbatidagi rozi mijozlarga bo‘sh vaqt taklif qilinadi. |
+| Mijoz odam bilan gaplashmoqchi | Dashboard’da qayta qo‘ng‘iroq vazifasi ochiladi. |
 
-Ishga tushirgich kalitlarni lokal `.env` fayliga yozadi. Telegram sessiyasi va mijozlar bazasi ham kompyuterda saqlanadi. Uchala ma’lumot Git’dan chiqarilgan. Suhbat paytida audio Gemini Live’ga uzatiladi. Dashboard faqat lokal manzilda ishlaydi.
+## 📞 Qo‘ng‘iroq qanday o‘tadi
+
+1. **Jiringlash.** Telefon jiringlayotganda Gemini Live’ga ulanish ochiladi va salom oldindan tayyorlanadi. Gemini tayyor bo‘lmasa, qo‘ng‘iroq jim qoldirilmaydi, rad etiladi.
+2. **Salom.** Mijoz go‘shakni olishi bilan salom darhol eshitiladi.
+3. **Til.** AI qisqa o‘zbekcha salomdan keyin mijoz gapirgan tilga o‘tadi: o‘zbekcha, ruscha yoki inglizcha.
+4. **Savollar.** Muammoni tinglaydi va yetishmagan tafsilotni so‘raydi: model, alomat, mehmonlar soni yoki xona.
+5. **Narx.** `quote` vositasi orqali demo tarifidan narx oralig‘ini aytadi.
+6. **Vaqt.** Mijoz aytgan aniq soatni tekshiradi. Band bo‘lsa, eng yaqin bo‘sh vaqtni taklif qiladi.
+7. **Tasdiq.** Bron tafsilotlarini qayta o‘qiydi va mijoz tasdiqlagach `save_details` bilan saqlaydi.
+8. **Xayrlashuv.** AI xayrlashgach go‘shakni o‘zi qo‘yadi. Murojaat dashboard’da paydo bo‘ladi.
+
+Mijoz gapira boshlasa, AI ovozi darhol to‘xtaydi va AI tinglashga o‘tadi. Suhbat yozuvi kartaga saqlanadi.
+
+## 🖥️ Dashboard
+
+Dashboard faqat shu kompyuterda, `http://127.0.0.1:8744/` manzilida ochiladi. Kunduz va tun rejimi bor, telefonda ham ishlaydi.
+
+![Murojaat kartasi: tashrif, narx, usta, Telegram, telefon va qabul qilish, rad etish, ustani tanlash tugmalari](docs/screens/call-card.jpg)
+
+- **Jonli qo‘ng‘iroq paneli.** Kim gaplashayotgani, suhbat vaqti va «Kartani ochish» tugmasi. AI mijozga o‘zi qo‘ng‘iroq qilganda ham ko‘rinadi.
+- **Ko‘rsatkichlar.** Bugungi qo‘ng‘iroqlar, tashrifga aylanganlar, konversiya, javob kutayotganlar, yuborilmagan xabarlar va qayta qo‘ng‘iroqlar.
+- **Haftalik kalendar.** Usta yoki xona bo‘yicha filtr. Tasdiqlangan bron to‘liq, taklif qilingan punktir, rad etilgan ustidan chizilgan. Hozirgi soat belgilanadi.
+- **Qo‘ng‘iroqlar tarixi.** Ism, model, telefon, muammo yoki taom bo‘yicha qidiruv.
+- **Murojaat kartasi.** Xizmatni o‘zgartirish, ustani tayinlash, **Qabul qilish**, **Rad etish**, **Bo‘sh vaqt** orqali boshqa vaqt taklif qilish, omonatni qayd qilish va qayta qo‘ng‘iroqni bajarilgan deb belgilash.
+
+| Kunduzgi rejim | Telefonda |
+| --- | --- |
+| ![Avtoservis dashboardi, kunduzgi rejim](docs/screens/dashboard-day.jpg) | ![Dashboard telefon ekranida](docs/screens/mobile.jpg) |
+
+Skrinshotlardagi barcha mijozlar, raqamlar va bronlar demo ma’lumotlar.
+
+## 🏪 Beshta yo‘nalish
+
+Dashboard tepasida yo‘nalishni tanlang. Tanlov shu Telegram akkauntiga keyin keladigan qo‘ng‘iroqlarga amal qiladi. Faol suhbat o‘z yo‘nalishida davom etadi. Har yo‘nalishning o‘z xizmatlari, narxlari, ish vaqti, xodimlari va kalendari bor.
+
+| Yo‘nalish | Xizmatlar | Kim yoki qayer | Ish vaqti |
+| --- | --- | --- | --- |
+| Avtoservis | Diagnostika, tormoz, moy almashtirish, elektr | Aziz, Bekzod | 09:00–18:00 |
+| Restoran | Stol, alohida xona, banket | Asosiy zal, Oila xonasi, Banket zali | 10:00–23:00 |
+| Go‘zallik saloni | Soch turmagi, manikyur | Malika, Dilnoza | 09:00–18:00 |
+| Texnika ta’miri | Telefon va noutbuk diagnostikasi | Kamol, Sardor | 09:00–18:00 |
+| Fotostudiya | Portret va guruh fotosessiyasi | Oq studiya, Katta studiya | 09:00–21:00 |
+
+![Restoran dashboardi, kunduzgi rejim: xonalar filtri, stol, xona va banket bronlari](docs/screens/restaurant-day.jpg)
+
+**Restoranda** xona, mehmonlar soni, kelish va tugash vaqti hamda taomlar ro‘yxati yoziladi. Banket yoki alohida xona uchun xodim omonatni kartadan qayd qiladi, keyin bronni tasdiqlaydi. Narx va omonatlar `business_profiles.py` faylida.
+
+## ▶️ Ishga tushirish
+
+Kerak bo‘ladi: Windows, **Python 3.14 x64** va Python Launcher (`py`), [Gemini API kaliti](https://aistudio.google.com/apikey), [Telegram API ID va hash](https://my.telegram.org).
+
+1. Repozitoriyni klonlang yoki **Code → Download ZIP** orqali yuklab, arxivdan chiqaring.
+2. **`start-demo.bat`** faylini ikki marta bosing.
+3. Birinchi startda paketlar o‘rnatiladi va oyna Gemini kaliti, Telegram API ID va API hash’ni so‘raydi. Kalitlar faqat yetishmaganda so‘raladi.
+4. Telegram raqamingizni, kelgan kodni va kerak bo‘lsa ikki bosqichli parolni kiriting. Keyingi startlarda saqlangan sessiya ishlatiladi.
+5. Robot qo‘ng‘iroq kuta boshlaydi va dashboard brauzerda ochiladi. To‘xtatish uchun **Ctrl+C** bosing.
+
+| Bosqich | Nima bo‘ladi |
+| --- | --- |
+| 1. Muhit | `.venv` yaratiladi, paketlar faqat `requirements-telegram.txt` o‘zgarganda o‘rnatiladi. |
+| 2. Kalitlar | `telegram_login.py --check` kalitlarni tekshiradi, yetishmaganini so‘raydi va `.env` ga yozadi. |
+| 3. Login | `telegram_login.py --setup` Telegram sessiyasini yaratadi. |
+| 4. Robot | `telegram_call_test.py` ishga tushadi. Aloqa uzilsa avtomatik qayta ulanadi. Log `.data/robot.log` faylida. |
+
+Brauzer ochilmasin desangiz, `VOICE404_NO_BROWSER=1` qo‘ying. Avvalgi ovoz modelini sinash uchun `.env` ichiga `GEMINI_LIVE_MODEL=gemini-3.1-flash-live-preview` yozing. Standart model `gemini-3.8-live`, ovoz Puck.
 
 ## ☎️ Hakamlar uchun sinov
 
-1. Ikkinchi Telegram akkauntidan robot ulangan akkauntga qo‘ng‘iroq qiling. *“Cobalt’im tormoz bosganda chiyillayapti. Ertaga 14:30 da ko‘rib bera olasizlarmi?”*
-2. AI yetishmagan savolni beradi va demo tarifidan narx aytadi. Qo‘ng‘iroq tarixi va tashrif so‘rovi dashboard’da ko‘rinadi. *“Bo‘ldi, rahmat”* deb suhbatni yakunlang.
-3. **Qabul qilish** vaqtni band qiladi va mijozga Telegram’dan aniq sana va soatni yuboradi. **Rad etish** so‘ralgan vaqtda qabul qilib bo‘lmasligini bildiradi.
-4. **Bo‘sh vaqt** orqali boshqa vaqt taklif qiling. Mijoz Telegram’dagi taklifga *“Bo‘ladi”* deb javob bergach, vaqt band qilinadi. Bir ustaning tashriflari to‘qnashmaydi. Xabar yuborilmasa kartadan qayta uriniladi.
+1. Ikkinchi Telegram akkauntidan robot ulangan akkauntga qo‘ng‘iroq qiling va ayting: *«Cobalt’im tormoz bosganda chiyillayapti. Ertaga 14:30 da ko‘rib bera olasizlarmi?»*
+2. AI yetishmagan savolni beradi, narxni aytadi va vaqtni tekshiradi. *«Bo‘ldi, rahmat»* deng. AI xayrlashib, go‘shakni o‘zi qo‘yadi.
+3. Dashboard’da yangi karta va kalendardagi so‘rovni ko‘ring.
+4. **Qabul qilish** vaqtni band qiladi va mijozga Telegram’da usta, sana va soat boradi. **Rad etish** mijozga bu vaqtda qabul qilib bo‘lmasligini bildiradi.
+5. **Bo‘sh vaqt** orqali boshqa vaqt taklif qiling. Mijoz *«Bo‘ladi»* deb javob bergach, vaqt band bo‘ladi.
+6. Mijoz tasdiq xabaridagi **KOCHIR** kodini yuborsa, vaqtni ko‘chirish so‘rovi ochiladi. Yangi taklif tasdiqlanguncha eski bron saqlanadi.
 
-Demo tariflari ko‘rik yoki ish haqi uchun. Detal va yakuniy ta’mir narxi ustaning ko‘rigidan keyin aniqlanadi.
+Demo narxlari faqat ko‘rik yoki ish haqi uchun. Detal va yakuniy ta’mir narxi usta ko‘rgandan keyin aytiladi.
 
-## 🧩 Kod tuzilishi
+## 🧩 Arxitektura va kod
+
+```
+Mijoz (Telegram) ──qo‘ng‘iroq──► telegram_call_test.py ──audio──► gemini_voice.py ◄──► Gemini Live
+                                        │                               │
+                                        │ xabarlar, eslatmalar          │ quote · save_details · finish_call
+                                        ▼                               ▼
+                                 service_desk.py  ◄──── SQLite (.data) ────►  dashboard.html (127.0.0.1:8744)
+```
 
 | Fayl | Vazifasi |
 | --- | --- |
-| `start-demo.bat` | Lokal Python muhitini tayyorlaydi, paketlarni o‘rnatadi, login va demoni boshlaydi. |
-| `telegram_login.py` | API qiymatlarini qabul qiladi va shaxsiy Telegram sessiyasini yaratadi. |
-| `telegram_call_test.py` | Qo‘ng‘iroqni ko‘taradi, ovozni uzatadi, dashboard’ni ochadi va Telegram xabarlarini boshqaradi. |
-| `gemini_voice.py` va `operator-prompt.md` | Jonli suhbat, mijoz gapirganda AI ovozini to‘xtatish, tarifni olish va so‘rovni yozish. |
-| `service_desk.py` | SQLite, tariflar, vaqt tekshiruvi, Telegram xabar navbati va lokal HTTP API. |
-| `dashboard.html` | Monochrome haftalik kalendar, qo‘ng‘iroqlar tarixi va usta amallari. |
-| `business_profiles.py` | Beshta yo‘nalish, 13 ta demo xizmat, narxlar, ustalar va ish vaqti. |
+| `start-demo.bat` | Bitta tugma bilan ishga tushirish: muhit, kalitlar, login, robot va avtomatik qayta ulanish. |
+| `telegram_login.py` | Kalitlarni tekshiradi (`--check`) va Telegram sessiyasini yaratadi (`--setup`). |
+| `telegram_call_test.py` | Qo‘ng‘iroqni ko‘taradi, ovozni uzatadi, ikkinchi qo‘ng‘iroqni kutishga qo‘yadi, Telegram xabarlari, eslatmalar va chiquvchi qo‘ng‘iroqlarni boshqaradi. |
+| `gemini_voice.py` | Gemini Live bilan jonli suhbat, audio formatini o‘zgartirish, AI vositalari va xayrlashuvda go‘shakni qo‘yish. |
+| `operator-prompt.md` | AI xodimning xulqi, savollari va qoidalari. |
+| `service_desk.py` | SQLite baza, narxlar, bo‘sh vaqt tekshiruvi, Telegram xabar navbati, kutish navbati va lokal HTTP API. |
+| `business_profiles.py` | Beshta yo‘nalish, 13 ta xizmat, narxlar, xodimlar va ish vaqti. |
 | `hold_audio.py` | Ikkinchi qo‘ng‘iroq uchun kutish e’loni va musiqasi. |
+| `dashboard.html` | Xodim paneli: kalendar, tarix, jonli qo‘ng‘iroq va murojaat kartalari. |
 | `test_service_desk.py` | Jadval, taklif kodlari va xavfsizlik uchun 10 ta test. |
 
-Har bir funksiya, qo‘ng‘iroq bosqichlari, API va kelajak rejasi [docs/CODE.md](docs/CODE.md) da batafsil yozilgan.
+**Lokal API.**
 
-`GET /api/requests` kalendar va tarixni yangilaydi. `GET /api/live` hozirgi jonli qo‘ng‘iroqni qaytaradi. `POST /api/decision` usta qarorini saqlaydi. Telegram javobi jo‘natuvchi va taklif bo‘yicha tekshiriladi. Suhbat savollarini tuzishda mahalliy servisning ochiq yozilish jarayonidan foydalandik. [Olamavto](https://olamavto.uz/uz/service)
-
-## 🚧 Prototipdan katta workflow’gacha
-
-Bu **Voice Agency g‘oyasining bitta ishlaydigan prototipi**. Hozirgi demo bitta avtoservis va ikki usta jadvalini qamrab oladi. Keyinchalik n8n yoki boshqa workflow tizimlari bilan CRM, ombor, to‘lov, eslatma va vazifa taqsimotini ulash mumkin. Shu yondashuvni turli bizneslarga moslab, administratorning qo‘ng‘iroq qabul qilish, ma’lumot yig‘ish, jadval tuzish va mijozga javob berish kabi kundalik ishlarini avtomatlashtirishni ko‘zlayapmiz. Murakkab yoki istisno holatlarda qaror xodimga uzatiladi.
-
-Hackathon demosi Gemini’ning bepul imkoniyatlariga tayanadi. Jonli qo‘ng‘iroqda javob kechikishi, ayrim so‘zlar noto‘g‘ri eshitilishi yoki ovoz uzilishi mumkin. Bunga model bilan birga aloqa sifati va audio integratsiya ham ta’sir qiladi. Moliyalashtirish bo‘lsa, 404 jamoasi barqarorroq ovoz modelini sinash, o‘zbekcha suhbatlarni baholash va audio sifatini yaxshilash ustida ishlaydi.
-
-**404 jamoasi** · [MIT litsenziyasi](LICENSE)
-
-## Ikki ustali demo
-
-- Aziz umumiy diagnostika va tormoz bilan ishlaydi. Bekzod moy almashtirish va elektr diagnostikasini oladi. Xizmatga qarab 30–60 daqiqa ajratiladi.
-- AI xizmat narxi bilan birga bo'sh vaqtlarni tekshiradi. Dashboard'ni usta bo'yicha filtrlash mumkin.
-- Tasdiqlangan tashrifga bir soat qolganda Telegram eslatmasi yuboriladi. Lokal demo shu vaqtda ishlab turishi kerak.
-- Mijoz tasdiq xabaridagi KOCHIR kodi bilan vaqtni o'zgartirishni so'raydi. Usta yangi vaqt taklif qiladi. Mijoz yangi taklifni tasdiqlaguncha eski bron saqlanadi.
-- AI usta bilan gaplashish so'rovini dashboard'da qayta qo'ng'iroq vazifasiga aylantiradi. Usta vazifani bajarilgan deb belgilaydi.
-
-## Usta tayinlash va tashrif qo'ng'iroqlari
-
-Murojaat kartasida ustani tanlab, Ustani tayinlash tugmasini bosing. Tashrif tasdiqlanganda mijozga usta, sana va soat yoziladi. Qo'ng'iroqqa rozilik bergan mijozga dastur tashrif vaqtida Telegram orqali qo'ng'iroq qiladi. Javob bo'lmasa bron saqlanadi.
-
-Mijoz kela olmasligini aytsa, vaqt bo'shaydi. Dastur shu xizmat bo'yicha ertaroq kelishga va qo'ng'iroqqa rozi bo'lgan mijozlarni navbat bilan chaqiradi. Bitta mijoz aniq rozi bo'lib, vaqt hali bo'sh bo'lsa, jadval yangilanadi va Telegram tasdig'i yuboriladi. Bu funksiya ishlashi uchun lokal robot ochiq turishi kerak.
-
-## v0.2 · Servis jadvali va bo‘shagan vaqtni to‘ldirish
-
-| Muammo | Voice Agency 404 qanday yordam beradi |
+| So‘rov | Vazifasi |
 | --- | --- |
-| Usta band paytida mijozning qo‘ng‘irog‘i javobsiz qolishi mumkin | AI Telegram qo‘ng‘irog‘ini qabul qiladi, o‘zbekcha gaplashadi va murojaatni kalendarga yozadi. |
-| Muammo, taxminiy narx va vaqt turli xabarlarda qolib ketadi | Mijoz aytgan alomat, mashina modeli, demo narxi va tashrif so‘rovi bitta kartada. |
-| Ustaga ustma-ust ish berilishi | Usta tayinlanadi va xizmat davomiyligi bo‘yicha bo‘sh vaqt tekshiriladi. Tasdiqda Telegram’dan usta ismi, sana va soat yuboriladi. |
-| Mijoz kelolmasa, servisning vaqti bo‘sh qoladi | Eslatma yuboriladi. Rozilik bergan mijozga tashrif vaqtida AI qo‘ng‘iroq qiladi. Mijoz kelolmasa, kutish navbatidagi rozi mijozlarga bo‘sh vaqt taklif qilinadi. |
-| Mijozga odam bilan gaplashish kerak | Ustaga qayta qo‘ng‘iroq vazifasi ochiladi. Dashboard tashriflar, kutilayotgan javoblar va yuborilmagan xabarlarni ko‘rsatadi. |
+| `GET /api/requests` | Barcha murojaatlar: kalendar va tarix uchun. |
+| `GET /api/live` | Hozirgi jonli qo‘ng‘iroq. |
+| `GET /api/business` | Yo‘nalishlar va faol yo‘nalish. |
+| `POST /api/decision` | Xodim qarori: qabul, rad, taklif, usta, omonat, menyu. |
+| `POST /api/business` | Faol yo‘nalishni almashtirish. |
 
-## Natijani qanday o‘lchaymiz?
+Har bir funksiya, qo‘ng‘iroq bosqichlari, `.env` sozlamalari va kengaytirish yo‘llari **[docs/CODE.md](docs/CODE.md)** da batafsil yozilgan.
 
-Prototip hozircha real avtoservisdagi mijoz saqlash foizini isbotlamagan. Pilotda quyidagilarni solishtiramiz:
+Testlarni ishga tushirish:
 
-- **Qo‘ng‘iroqdan tashrifga o‘tish** = tasdiqlangan tashriflar ÷ kelgan qo‘ng‘iroqlar.
-- **Bo‘sh vaqtni qayta to‘ldirish** = kutish navbatidan tasdiqlangan yangi bronlar ÷ bekor qilingan va qayta taklif qilingan vaqtlar.
-- **Xizmat samaradorligi** = kelgan mijozlar ulushi, tasdiqqacha o‘tgan vaqt va xodimning bitta murojaatga sarflagan daqiqalari.
+```powershell
+.\.venv\Scripts\python.exe -m unittest test_service_desk -v
+```
 
-**Hisob namunasi.** Bir haftada 100 ta qo‘ng‘iroq bo‘lib, 20 tasi o‘tkazib yuborilgan deylik. AI o‘sha 20 ta murojaatdan 6 tasini tasdiqlangan tashrifga aylantirsa, bu **6 ta qo‘shimcha bron**. Yana 10 ta bekor qilingan vaqtdan 3 tasi navbat orqali qayta band qilinsa, **3 ta bo‘sh slot to‘lgan** bo‘ladi. Bu ikki ko‘rsatkich alohida yuritiladi, chunki bir mijoz ikkala guruhda ham uchrashi mumkin. Bron va haqiqatan kelgan mijoz ham alohida hisoblanadi.
+## 🔒 Xavfsizlik va maxfiylik
 
-## Ovozli yordamchi uch tilda ishlaydi
+- Kalitlar `.env` da, Telegram sessiyasi `.telegram/` da, mijozlar bazasi `.data/` da. Uchalasi ham Git’ga kirmaydi.
+- Dashboard faqat `127.0.0.1` da ochiladi va faqat `127.0.0.1` va `localhost` Host nomlariga javob beradi. Bu DNS rebinding orqali ma’lumot o‘qishni to‘sadi. POST so‘rovlarda Origin tekshiriladi, so‘rov hajmi 2 KB bilan cheklangan.
+- Telegram javobi jo‘natuvchi va taklif kodi bo‘yicha tekshiriladi, begona odam bronni tasdiqlay olmaydi.
+- Suhbat paytida audio Gemini Live’ga uzatiladi. Boshqa hech qayerga yuborilmaydi.
 
-O‘zbekcha, ruscha va inglizcha. AI qisqa o‘zbekcha salomdan keyin mijoz gapirayotgan tilga moslashadi. Telegram matnli bron bildirishnomalari o‘zbekcha. AI Telegram xulosasini yuborish haqida savol bermaydi. Keyingi ovozli qo‘ng‘iroq uchun mijoz roziligi olinadi.
+## 📊 Natijani qanday o‘lchaymiz
 
-## Video va texnik taqdimot
+Prototip hali haqiqiy biznesda sinalmagan. Pilotda quyidagilarni o‘lchaymiz:
 
-[Taqdimot PDF](docs/final-pitch.pdf) · [Final video · Full HD, 1:28](https://drive.google.com/drive/folders/18oKNS8oeazvJrhctXxpkJiDIkqKZArZ7) · [GitHub’dagi video nusxasi](docs/404-final.mp4) · [Texnik pitch](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
+- **Qo‘ng‘iroqdan tashrifga** = tasdiqlangan tashriflar ÷ kelgan qo‘ng‘iroqlar.
+- **Bo‘sh vaqtni qayta to‘ldirish** = kutish navbatidan tasdiqlangan bronlar ÷ bo‘shagan vaqtlar.
+- **Tezlik** = tasdiqqacha o‘tgan vaqt va xodimning bitta murojaatga sarflagan daqiqalari.
 
-Video 3D sahnalar bilan loyiha qanday ishlashini ko‘rsatadi: tungi javobsiz qo‘ng‘iroq, AI bilan suhbat, bo‘sh vaqt tekshiruvi, bron, dashboard’da qabul qilish va Telegram tasdig‘i. Suhbat ovozlari Voicelab TTS bilan sahnalashtirilgan. Dashboard kadrlari demo ma’lumotlar bilan olingan.
+**Misol.** Haftasiga 100 ta qo‘ng‘iroqdan 20 tasi javobsiz qoladi deylik. AI shu 20 tadan 6 tasini tashrifga aylantirsa, bu **6 ta qo‘shimcha bron**. Bekor qilingan 10 ta vaqtdan 3 tasi navbat orqali to‘lsa, **3 ta bo‘sh vaqt to‘lgan** bo‘ladi.
 
-## Ikkinchi kiruvchi qo‘ng‘iroq uchun kutish musiqasi
+## ⚠️ Cheklovlar
 
-Demo bitta faol va bitta kutayotgan kiruvchi qo‘ng‘iroqqa mo‘ljallangan. Kutishni yoqish uchun ishlatishga ruxsatingiz bo‘lgan audioni 48 kHz, 16-bit, mono PCM formatga aylantiring va robotni qayta ishga tushiring.
+- Demo Gemini’ning bepul imkoniyatlariga tayanadi. Jonli qo‘ng‘iroqda kechikish, noto‘g‘ri eshitilgan so‘z yoki ovoz uzilishi bo‘lishi mumkin.
+- Robot va dashboard ishlashi uchun kompyuter yoqiq va dastur ochiq turishi kerak. Eslatma va tashrif qo‘ng‘iroqlari ham shunga bog‘liq.
+- Narxlar demo uchun. Omonatni xodim o‘zi qayd qiladi, onlayn to‘lov hali yo‘q.
+- Ikkinchi qo‘ng‘iroqni kutishga qo‘yish ikki telefon bilan jonli sinalmagan.
+
+## 🛣️ Kelajak rejasi
+
+- **Yaqin vaqtda:** bitta haqiqiy biznesda pilot, o‘zbekcha suhbatlarni baholash, audio sifatini yaxshilash.
+- **O‘rta muddat:** oddiy telefon raqami (SIP), Click va Payme orqali omonat, CRM va n8n integratsiyasi, bir nechta filial, o‘lchov paneli.
+- **Uzoq muddat:** ko‘p biznes uchun bulutli xizmat (SaaS), yangi yo‘nalishlar, ko‘proq tillar, qo‘ng‘iroqlar analitikasi va murakkab holatda suhbatni jonli xodimga uzatish.
+
+Batafsil reja [docs/CODE.md](docs/CODE.md#kelajakda-nimalar-qilish-mumkin) oxirida.
+
+## 🎞️ Video va taqdimot
+
+- **Final video**, Full HD, 1:28: [Google Drive](https://drive.google.com/file/d/1y3i6GqpcdwkYLAerR32SWI1PhbDxs8sl/view) · [GitHub’dagi siqilgan nusxa](docs/404-final.mp4)
+- **Taqdimot**, 17 slayd: [Google Drive](https://drive.google.com/file/d/1RsMOCRwaQDuzHp2iotwG1XHem5Ruk5No/view) · [docs/final-pitch.pdf](docs/final-pitch.pdf)
+- **HTML slaydlar:** [pitch deck](docs/pitch-deck.html) va [texnik pitch](docs/technical-pitch.html). Yuklab olib brauzerda oching, **← / →** bilan almashtiring, **F** bilan to‘liq ekran.
+
+Video 3D sahnalarda loyihani ko‘rsatadi: tungi javobsiz qo‘ng‘iroq, AI bilan suhbat, bo‘sh vaqt tekshiruvi, bron, dashboard’da qabul qilish va Telegram tasdig‘i. Suhbat ovozlari Voicelab TTS bilan sahnalashtirilgan, dashboard kadrlari demo ma’lumotlar bilan olingan.
+
+## Kutish musiqasi (ixtiyoriy)
+
+Demo bitta faol va bitta kutayotgan qo‘ng‘iroqni qo‘llaydi. Kutishni yoqish uchun foydalanishga ruxsatingiz bor audioni shu formatga aylantiring va robotni qayta ishga tushiring:
 
 ```powershell
 New-Item -ItemType Directory -Force .data
 ffmpeg -i "musiqa.mp3" -ar 48000 -ac 1 -f s16le .data/hold-music.pcm
+ffmpeg -i "elon.mp3"   -ar 48000 -ac 1 -f s16le .data/hold-announcement.pcm
 ```
 
-Boshlang‘ich e’lon uchun ikkinchi audioni shu formatda `.data/hold-announcement.pcm` qilib saqlang. `hold_audio.py` e’lonni bir marta o‘qiydi va musiqani suhbatga ulashgacha takrorlaydi. Birinchi mijoz yakunlagach, robot kutayotgan mijozga Gemini Live’ni ulaydi. Ikki telefon bilan jonli sinov hali o‘tkazilmagan.
+E’lon bir marta o‘qiladi, musiqa esa navbat kelguncha takrorlanadi. Birinchi suhbat tugagach, kutayotgan mijoz AI bilan ulanadi.
 
-## Beshta xizmat uchun demo
+---
 
-Dashboard tepasida yo‘nalishni tanlang. Tanlov shu Telegram akkauntiga keyin keladigan qo‘ng‘iroqlar uchun amal qiladi. Faol suhbat o‘z yo‘nalishida davom etadi. Har yo‘nalish o‘z murojaatlari, tariflari, ish vaqti va kalendariga ega.
-
-- **Avtoservis** — diagnostika, tormoz, moy va elektr ishlari.
-- **Restoran** — stol yoki xona broni, banket, mehmonlar soni va menyu. Banket yoki alohida xona uchun xodim tashqarida olingan omonatni kartadan qayd qiladi, keyin bronni tasdiqlaydi.
-- **Go‘zallik saloni** — soch turmagi va manikyur.
-- **Texnika ta’miri** — telefon va noutbuk diagnostikasi.
-- **Fotostudiya** — portret va guruh fotosessiyasi.
-
-Narxlar va omonatlar demo uchun `business_profiles.py` faylida. Mijoz aniq vaqt aytmagan bo‘lsa, **Bo‘sh vaqt** bo‘limida sana va soatni belgilab **Shu vaqtga qabul qilish**ni bosing.
-
-Standart ovoz modeli `gemini-3.8-live`. Avvalgi modelni sinash uchun lokal `.env` ichida `GEMINI_LIVE_MODEL=gemini-3.1-flash-live-preview` qiymatini qo‘ying va robotni qayta ishga tushiring.
+**404 jamoasi** · [MIT litsenziyasi](LICENSE) · Suhbat savollarini tuzishda [Olamavto](https://olamavto.uz/uz/service) servisining ochiq yozilish jarayonidan foydalandik.
