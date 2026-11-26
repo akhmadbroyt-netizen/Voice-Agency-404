@@ -37,20 +37,35 @@ Robot va dashboard bitta Python jarayonida ishlaydi. Telegram sessiyasi, kalitla
 
 ## `start-demo.bat`
 
-Windows uchun bitta tugmali ishga tushirgich.
+Windows uchun bitta tugmali sozlash va ishga tushirish. Kompyuterda Python bo‘lmasa ham ishlaydi.
 
 | Bosqich | Nima qiladi |
 | --- | --- |
-| 1/4 | `.venv` yo‘q bo‘lsa, `py -3.14 -m venv .venv` bilan yaratadi. |
-| 2/4 | `requirements-telegram.txt` o‘zgargan bo‘lsa, paketlarni o‘rnatadi. O‘rnatilgan nusxa `.venv\requirements.installed` da saqlanadi. |
-| 3/4 | `telegram_login.py --check` bilan kalitlar va sessiyani tekshiradi. Yetishmasa `--setup` ni ochadi. |
-| 4/4 | `telegram_call_test.py` ni ishga tushiradi. Telegram aloqasi uzilsa, 5 soniyadan keyin qayta ulanadi. Ketma-ket 3 ta xato yoki 20 dan ortiq qayta ulanishda to‘xtaydi. |
+| 1/5 Python | `.venv` bo‘lsa, shuni ishlatadi. Bo‘lmasa `py -3.14` yoki `%LOCALAPPDATA%\Programs\Python\Python314` ni qidiradi. Topilmasa, `winget install Python.Python.3.14` bilan foydalanuvchi uchun o‘rnatadi va `.venv` yaratadi. winget ham bo‘lmasa, python.org sahifasini ochadi. |
+| 2/5 Paketlar | `requirements-telegram.txt` o‘zgargan bo‘lsa, pip’ni yangilab paketlarni o‘rnatadi. O‘rnatilgan nusxa `.venv\requirements.installed` da saqlanadi. |
+| 3/5 Kalitlar | `telegram_login.py --check` bilan `.env` ni tekshiradi. Yetishmagan yoki noto‘g‘ri kalit bo‘lsa, sozlash ustasini ochadi. |
+| 4/5 Telegram | `telegram_login.py --setup` saqlangan sessiyani tekshiradi yoki yangi login qiladi. |
+| 5/5 Robot | `telegram_call_test.py` ni ishga tushiradi. Telegram ulangach dashboard brauzerda ochiladi. Aloqa uzilsa, 5 soniyadan keyin qayta ulanadi. Ketma-ket 3 ta xato yoki 20 dan ortiq qayta ulanishda to‘xtaydi. |
 
-`start-demo.bat --check` faqat sozlamalarni tekshiradi. Qayta ulanishda `VOICE404_NO_BROWSER=1` o‘rnatiladi, shuning uchun brauzer qayta ochilmaydi.
+| Buyruq | Vazifasi |
+| --- | --- |
+| `start-demo.bat` | Kerak bo‘lsa sozlaydi, keyin ishga tushiradi. |
+| `start-demo.bat --reset` | Barcha kalitlarni va Telegram akkauntini qaytadan kiritadi. |
+| `start-demo.bat --check` | Faqat sozlamalarni tekshiradi, hech narsa ishga tushirmaydi. |
+
+Qayta ulanishda `VOICE404_NO_BROWSER=1` o‘rnatiladi, shuning uchun brauzer qayta ochilmaydi.
 
 ## `telegram_login.py`
 
-- **`main()`**: `--check` rejimida `.env` dagi `GEMINI_API_KEY` borligini, `TELEGRAM_API_ID` musbat son va `TELEGRAM_API_HASH` 32 belgili hex ekanini tekshiradi. Login qilinmaydi. `--setup` rejimida yetishmagan kalitlarni so‘raydi, `.env` ga yozadi va Telethon orqali `.telegram/voice-agency.session` sessiyasini yaratadi: telefon raqami, login kodi va kerak bo‘lsa ikki bosqichli parol.
+O‘zbekcha sozlash ustasi. Kalitlar faqat lokal `.env` ga yoziladi.
+
+- **`problems(config)`**: yetishmagan yoki noto‘g‘ri kalitlar ro‘yxati. `GEMINI_API_KEY` bo‘sh bo‘lmasligi, `TELEGRAM_API_ID` musbat son, `TELEGRAM_API_HASH` 32 belgili hex bo‘lishi kerak.
+- **`valid_api_id`, `valid_api_hash`, `masked`**: kiritilgan qiymatni tekshiradi va ekranda faqat oxirgi 4 belgisini ko‘rsatadi.
+- **`gemini_works(key)`**: kalit bilan bitta model ro‘yxatini so‘raydi. Google rad etsa `False`, internet yo‘qligi sababli tekshirib bo‘lmasa `None` qaytaradi, shunda kalit baribir saqlanadi.
+- **`ask_gemini()`**: `aistudio.google.com/apikey` ni brauzerda ochadi, kalitni yashirin so‘raydi va ishlamaguncha qayta so‘raydi.
+- **`ask_telegram_api()`**: `my.telegram.org/apps` ni ochadi, ilova yaratishni tushuntiradi, `api_id` va `api_hash` ni to‘g‘ri formatda kiritilguncha so‘raydi.
+- **`sign_in(api_id, api_hash, reset)`**: Telethon orqali `.telegram/voice-agency.session` ni yaratadi yoki tekshiradi. Telefon, kod va ikki bosqichli parol o‘zbekcha so‘raladi. Muvaffaqiyatda akkaunt nomini ko‘rsatadi. Telegram `api_id`/`api_hash` ni rad etsa `None` qaytaradi va usta ularni qayta so‘raydi.
+- **`main()`**: `--check` faqat tekshiradi (tarmoqsiz), `--setup` yetishmaganini so‘raydi va login qiladi, `--reset` hammasini qaytadan so‘raydi va eski sessiyani o‘chiradi.
 
 ## `telegram_call_test.py`
 

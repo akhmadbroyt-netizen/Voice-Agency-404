@@ -1,5 +1,12 @@
 # O‘zgarishlar tarixi
 
+## v0.6.1 · To‘liq sozlash ustasi
+
+- `start-demo.bat` Python 3.14 yo‘q bo‘lsa, `winget` bilan avtomatik o‘rnatadi.
+- `telegram_login.py` o‘zbekcha sozlash ustasiga aylandi: Gemini va Telegram kalit sahifalarini brauzerda ochadi, har qadamni tushuntiradi, Gemini kalitini Google’da tekshiradi, noto‘g‘ri qiymatda yopilmasdan qayta so‘raydi va ulangan akkaunt nomini ko‘rsatadi.
+- `start-demo.bat --reset` kalitlarni va Telegram akkauntini qaytadan kiritadi.
+- README va kod qo‘llanmasida sozlash bosqichlari jadval bilan yozildi.
+
 ## v0.6 · Tezkor salom, avtomatik go‘shak va to‘liq hujjatlar
 
 - Salom go‘shak ko‘tarilishidan oldin to‘liq tayyorlanadi. Telefon Gemini ulanguncha jiringlab turadi, mijoz ulanishi bilan salom darhol eshitiladi. Gemini ulanmasa, qo‘ng‘iroq jim qoldirilmaydi, rad etiladi.

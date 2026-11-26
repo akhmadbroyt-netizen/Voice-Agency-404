@@ -88,22 +88,28 @@ Dashboard tepasida yo‘nalishni tanlang. Tanlov shu Telegram akkauntiga keyin k
 
 ## ▶️ Ishga tushirish
 
-Kerak bo‘ladi: Windows, **Python 3.14 x64** va Python Launcher (`py`), [Gemini API kaliti](https://aistudio.google.com/apikey), [Telegram API ID va hash](https://my.telegram.org).
+Kerak bo‘ladi: Windows 10 yoki 11, internet, Google akkaunti (Gemini kaliti uchun) va ikkita Telegram akkaunti: biri robot uchun, ikkinchisi qo‘ng‘iroq qilish uchun. Python shart emas, kerak bo‘lsa avtomatik o‘rnatiladi.
 
 1. Repozitoriyni klonlang yoki **Code → Download ZIP** orqali yuklab, arxivdan chiqaring.
-2. **`start-demo.bat`** faylini ikki marta bosing.
-3. Birinchi startda paketlar o‘rnatiladi va oyna Gemini kaliti, Telegram API ID va API hash’ni so‘raydi. Kalitlar faqat yetishmaganda so‘raladi.
-4. Telegram raqamingizni, kelgan kodni va kerak bo‘lsa ikki bosqichli parolni kiriting. Keyingi startlarda saqlangan sessiya ishlatiladi.
-5. Robot qo‘ng‘iroq kuta boshlaydi va dashboard brauzerda ochiladi. To‘xtatish uchun **Ctrl+C** bosing.
+2. **`start-demo.bat`** faylini ikki marta bosing. Qolgan hammasini oyna o‘zi so‘raydi:
 
-| Bosqich | Nima bo‘ladi |
+| Bosqich | Nima bo‘ladi | Sizdan nima kerak |
+| --- | --- | --- |
+| 1. Python | Python 3.14 bo‘lmasa, `winget` bilan avtomatik o‘rnatiladi va `.venv` yaratiladi. | Hech narsa. |
+| 2. Paketlar | Telethon, py-tgcalls, google-genai va boshqalar o‘rnatiladi. Birinchi marta bir necha daqiqa oladi. | Kutish. |
+| 3. Gemini kaliti | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) brauzerda ochiladi. Kalit kiritilgach, Google’da tekshiriladi. | **Create API key** → nusxalash → oynaga qo‘yish. |
+| 4. Telegram API | [my.telegram.org/apps](https://my.telegram.org/apps) ochiladi. `api_id` va `api_hash` formati tekshiriladi. | Raqam bilan kirish → istalgan nomli ilova yaratish → `api_id` va `api_hash` ni nusxalash. |
+| 5. Telegram login | Robot ishlaydigan akkauntga ulanadi va akkaunt nomini ko‘rsatadi. | Telefon raqami, Telegram’ga kelgan kod, kerak bo‘lsa ikki bosqichli parol. |
+| 6. Ishga tushish | Robot qo‘ng‘iroq kuta boshlaydi, dashboard `http://127.0.0.1:8744/` brauzerda o‘zi ochiladi. | Ikkinchi akkauntdan qo‘ng‘iroq qilish. |
+
+Kalit noto‘g‘ri kiritilsa, oyna yopilmaydi, sababini aytib qayta so‘raydi. Keyingi startlarda hech narsa so‘ralmaydi: saqlangan kalitlar va sessiya tekshiriladi va robot darhol ishga tushadi. To‘xtatish uchun **Ctrl+C** bosing.
+
+| Buyruq | Vazifasi |
 | --- | --- |
-| 1. Muhit | `.venv` yaratiladi, paketlar faqat `requirements-telegram.txt` o‘zgarganda o‘rnatiladi. |
-| 2. Kalitlar | `telegram_login.py --check` kalitlarni tekshiradi, yetishmaganini so‘raydi va `.env` ga yozadi. |
-| 3. Login | `telegram_login.py --setup` Telegram sessiyasini yaratadi. |
-| 4. Robot | `telegram_call_test.py` ishga tushadi. Aloqa uzilsa avtomatik qayta ulanadi. Log `.data/robot.log` faylida. |
+| `start-demo.bat --reset` | Kalitlarni yoki Telegram akkauntini almashtirish. |
+| `start-demo.bat --check` | Sozlamalarni tekshirish, ishga tushirmasdan. |
 
-Brauzer ochilmasin desangiz, `VOICE404_NO_BROWSER=1` qo‘ying. Avvalgi ovoz modelini sinash uchun `.env` ichiga `GEMINI_LIVE_MODEL=gemini-3.1-flash-live-preview` yozing. Standart model `gemini-3.8-live`, ovoz Puck.
+Telegram aloqasi uzilsa, robot 5 soniyadan keyin o‘zi qayta ulanadi. Log `.data/robot.log` faylida. Brauzer ochilmasin desangiz, `VOICE404_NO_BROWSER=1` qo‘ying. Avvalgi ovoz modelini sinash uchun `.env` ichiga `GEMINI_LIVE_MODEL=gemini-3.1-flash-live-preview` yozing. Standart model `gemini-3.8-live`, ovoz Puck.
 
 ## ☎️ Hakamlar uchun sinov
 
@@ -129,7 +135,7 @@ Mijoz (Telegram) ──qo‘ng‘iroq──► telegram_call_test.py ──audio
 | Fayl | Vazifasi |
 | --- | --- |
 | `start-demo.bat` | Bitta tugma bilan ishga tushirish: muhit, kalitlar, login, robot va avtomatik qayta ulanish. |
-| `telegram_login.py` | Kalitlarni tekshiradi (`--check`) va Telegram sessiyasini yaratadi (`--setup`). |
+| `telegram_login.py` | O‘zbekcha sozlash ustasi: kalit sahifalarini ochadi, Gemini kalitini tekshiradi, Telegram’ga login qiladi (`--check`, `--setup`, `--reset`). |
 | `telegram_call_test.py` | Qo‘ng‘iroqni ko‘taradi, ovozni uzatadi, ikkinchi qo‘ng‘iroqni kutishga qo‘yadi, Telegram xabarlari, eslatmalar va chiquvchi qo‘ng‘iroqlarni boshqaradi. |
 | `gemini_voice.py` | Gemini Live bilan jonli suhbat, audio formatini o‘zgartirish, AI vositalari va xayrlashuvda go‘shakni qo‘yish. |
 | `operator-prompt.md` | AI xodimning xulqi, savollari va qoidalari. |
