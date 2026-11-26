@@ -1,4 +1,5 @@
 import asyncio
+import os
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -13,10 +14,16 @@ from webbrowser import open as open_browser
 from gemini_voice import SUPPORTED_LANGUAGES, talk
 from hold_audio import play_hold
 from service_desk import (
-    PORT, active_business, attendance_result, business_for, deposit_for, book_opening, claim_attendance_call, confirm_offer,
-    dashboard_server, delivery_result, pending_messages, request_move, save_request,
+    PORT, active_business, attendance_result, business_for, deposit_for, book_opening, claim_attendance_call, clear_live_call,
+    confirm_offer, dashboard_server, delivery_result, pending_messages, request_move, save_request, set_live_call,
     waitlist_candidates,
 )
+
+GREETING_WAIT = 8
+
+MOVE_ACCEPTED = "Ko‘chirish so‘rovingiz qabul qilindi. Xodim yangi vaqt taklif qiladi, eski bron hozircha saqlanadi."
+MOVE_NOT_FOUND = "Bu kod bo‘yicha faol bron topilmadi. Tasdiq xabaridagi KOCHIR kodini tekshirib qayta yozing."
+OFFER_NOT_FOUND = "Bu kod bo‘yicha amaldagi taklif topilmadi. Taklif muddati o‘tgan yoki omonat hali qayd qilinmagan bo‘lishi mumkin."
 
 
 async def main():
@@ -57,15 +64,18 @@ async def main():
                     print("Telegram username unavailable; keeping the caller ID.", flush=True)
                 business = active_business()
                 request_id, *_ = save_request(peer_id, username, "", "", None, False, business=business)
+                set_live_call(peer_id, request_id)
                 print(f"Call recorded: {request_id}", flush=True)
                 await talk(calls, peer_id, incoming, config, username, request_id, business=business,
                                       playback_gate=playback_gate, greeting_ready=greeting_ready)
                 voice_task = None
+                clear_live_call(peer_id)
                 await calls.leave_call(peer_id)
             except Exception as error:
+                clear_live_call(peer_id)
                 if isinstance(error, ExceptionGroup):
                     error = error.exceptions[0]
-                print(f"Gemini audio failed ({type(error).__name__}).", flush=True)
+                print(f"Gemini audio failed ({type(error).__name__}: {str(error)[:300]}).", flush=True)
                 code = getattr(error, "code", None)
                 if isinstance(code, int):
                     print(f"Gemini error code: {code}", flush=True)
@@ -86,12 +96,21 @@ async def main():
             voice_task = task
             try:
                 if not already_joined:
-                    try:
-                        await asyncio.wait_for(greeting_ready.wait(), 1.5)
-                    except TimeoutError:
-                        print("Greeting still preparing; answering Telegram.", flush=True)
+                    # Let the phone ring until Gemini is connected and the greeting is fully prepared.
+                    ready = asyncio.create_task(greeting_ready.wait())
+                    await asyncio.wait({ready, task}, timeout=GREETING_WAIT, return_when=asyncio.FIRST_COMPLETED)
+                    ready.cancel()
                     if not connected or caller_id != peer_id:
                         return
+                    if task.done():
+                        print("Gemini is not ready; the call is declined instead of answering in silence.", flush=True)
+                        connected = False
+                        voice_task = None
+                        playback_gate.set()
+                        await calls.leave_call(peer_id)
+                        return
+                    if not greeting_ready.is_set():
+                        print("Greeting still preparing; answering Telegram.", flush=True)
                     await calls.play(peer_id, Stream(microphone=AudioStream(MediaSource.EXTERNAL, "")))
                 if connected and caller_id == peer_id:
                     await calls.record(peer_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
@@ -145,6 +164,7 @@ async def main():
                             waiting_task = None
                     elif connected and peer_id == caller_id:
                         connected = False
+                        clear_live_call(peer_id)
                         if voice_task and not voice_task.done() and voice_task is not asyncio.current_task():
                             voice_task.cancel()
                             voice_task = None
@@ -174,10 +194,22 @@ async def main():
             if not words or len(words) > 2:
                 return
             token = words[1] if len(words) == 2 else None
+            reply = None
+            # A bare "ha" in an ordinary chat must stay silent; only coded or quoted replies get an answer.
+            addressed = token is not None or event.reply_to_msg_id is not None
             if words[0] in ("kochir", "kechikaman"):
-                request_move(event.sender_id, event.reply_to_msg_id, token)
+                if request_move(event.sender_id, event.reply_to_msg_id, token):
+                    reply = MOVE_ACCEPTED
+                elif addressed:
+                    reply = MOVE_NOT_FOUND
             elif words[0] in ("boladi", "ha"):
-                confirm_offer(event.sender_id, event.reply_to_msg_id, token)
+                if not confirm_offer(event.sender_id, event.reply_to_msg_id, token) and token is not None:
+                    reply = OFFER_NOT_FOUND
+            if reply:
+                try:
+                    await event.reply(reply)
+                except Exception as error:
+                    print(f"Telegram reply failed ({type(error).__name__}).", flush=True)
 
         async def outbound_call(job, greeting, answer):
             nonlocal caller_id, connected, received_audio, voice_task
@@ -204,6 +236,7 @@ async def main():
                 if not connected:
                     return
                 await calls.record(caller_id, RecordStream(audio=True, audio_parameters=AudioParameters(48000, 1)))
+                set_live_call(caller_id, job.get("id"), "outbound")
                 voice_task = asyncio.create_task(talk(calls, caller_id, incoming, config, outbound={
                     "prompt": prompt, "greeting": f"Say this in language code {language}: {greeting}", "answer": answer,
                 }))
@@ -212,6 +245,7 @@ async def main():
                 print(f"Scheduled Telegram call failed ({type(error).__name__}).", flush=True)
             finally:
                 voice_task = None
+                clear_live_call(caller_id)
                 try:
                     if connected:
                         await calls.leave_call(caller_id)
@@ -290,7 +324,9 @@ async def main():
             url = f"http://127.0.0.1:{PORT}"
             print(f"Dashboard: {url}", flush=True)
             print("Auto-answer active. Press Ctrl+C to stop.", flush=True)
-            open_browser(url)
+            # The launcher sets this on automatic restarts so each reconnect does not open another tab.
+            if not os.environ.get("VOICE404_NO_BROWSER"):
+                open_browser(url)
             notices = asyncio.create_task(send_notices())
             scheduled = asyncio.create_task(scheduled_calls())
             try:
@@ -304,7 +340,30 @@ async def main():
         await client.disconnect()
 
 
+class Tee:
+    """Mirror console output to .data/robot.log so a failed call can be diagnosed afterwards."""
+
+    def __init__(self, stream, path):
+        self.stream, self.file = stream, open(path, "a", encoding="utf-8", buffering=1)
+
+    def write(self, text):
+        self.stream.write(text)
+        self.file.write(text)
+        return len(text)
+
+    def flush(self):
+        self.stream.flush()
+        self.file.flush()
+
+
 if __name__ == "__main__":
+    import sys
+    from datetime import datetime
+    log = Path(__file__).resolve().parent / ".data" / "robot.log"
+    log.parent.mkdir(exist_ok=True)
+    sys.stdout = Tee(sys.stdout, log)
+    sys.stderr = Tee(sys.stderr, log)
+    print(f"--- start {datetime.now():%Y-%m-%d %H:%M:%S}", flush=True)
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

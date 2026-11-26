@@ -1,6 +1,9 @@
 from contextlib import closing
 from datetime import datetime, timedelta
+from http.client import HTTPConnection
+from http.server import ThreadingHTTPServer
 from pathlib import Path
+from threading import Thread
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
 from unittest.mock import patch
@@ -85,6 +88,40 @@ class BookingTests(TestCase):
         self.assertTrue(all(slot.startswith(future + "T") for slot in slots))
         self.assertIsNone(desk.check_slot(service, exact))
         self.assertIsNone(desk.check_slot(service, future + "T10:15"))
+
+    def test_move_request_needs_matching_caller(self):
+        request_id = self.request()
+        desk.decide(request_id, "accept")
+        desk.delivery_result(request_id, 200)
+        self.assertFalse(desk.request_move(77, None, request_id))
+        self.assertTrue(desk.request_move(42, None, request_id))
+
+    def test_live_call_is_cleared_only_by_same_caller(self):
+        desk.set_live_call(42, "abc")
+        self.addCleanup(desk.clear_live_call)
+        self.assertEqual(desk.live_call()["request_id"], "abc")
+        desk.clear_live_call(77)
+        self.assertTrue(desk.live_call()["active"])
+        desk.clear_live_call(42)
+        self.assertFalse(desk.live_call()["active"])
+
+    def test_dashboard_rejects_foreign_host(self):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), desk.Dashboard)
+        self.addCleanup(server.server_close)
+        Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.shutdown)
+        port = server.server_address[1]
+
+        def status(host):
+            connection = HTTPConnection("127.0.0.1", port, timeout=5)
+            connection.request("GET", "/api/live", headers={"Host": host})
+            response = connection.getresponse()
+            response.read()
+            connection.close()
+            return response.status
+
+        self.assertEqual(status(desk.LOCAL_HOSTS[0]), 200)
+        self.assertEqual(status("evil.example:8744"), 403)
 
     def test_active_business_persists(self):
         self.assertEqual(desk.active_business(), "auto")

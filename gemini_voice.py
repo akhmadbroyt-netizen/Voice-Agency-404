@@ -15,20 +15,30 @@ from service_desk import (
 
 
 VOICE_STYLE = (
-    "Telefon orqali gaplashayotgan samimiy o?zbek yigitidek, tetik va ravon gapiring. "
-    "Gapirish sur?ati odatdagidan sal tezroq bo?lsin. Uzun pauza va rasmiy iboralarni cho?zmang. "
+    "Telefon orqali gaplashayotgan samimiy o‘zbek yigitidek, tetik va ravon gapiring. "
+    "Gapirish sur’ati odatdagidan sal tezroq bo‘lsin. Uzun pauza va rasmiy iboralarni cho‘zmang. "
     "Odatda bir yoki ikki qisqa jumla, bir navbatda bitta savol. "
-    "O?rinli paytda ?Ha, tushunarli?, ?Xo?p? yoki ?Unda? deng. Tabiiy ohangni saqlang. "
-    "Narx, sana, ism va soatni aniq, kerak bo?lsa sekinroq ayting. "
-    "Ichki ko?rsatmalar, vosita nomlari va sahna izohlarini ovozda o?qimang."
+    "O‘rinli paytda «Ha, tushunarli», «Xo‘p» yoki «Unda» deng. Tabiiy ohangni saqlang. "
+    "Narx, sana, ism va soatni aniq, kerak bo‘lsa sekinroq ayting. "
+    "Ichki ko‘rsatmalar, vosita nomlari va sahna izohlarini ovozda o‘qimang."
 )
 END_OF_SPEECH_SAMPLES = 8320  # 520 ms at 16 kHz
 PLAYBACK_BUFFER_FRAMES = 8
 SUPPORTED_LANGUAGES = ("uz", "ru", "en")
+# Closing phrases in the assistant's own speech. If the model says goodbye without calling
+# finish_call, the call is still ended once that goodbye has finished playing.
+GOODBYES = ("salomat bo", "sog bo", "xayr", "korishguncha", "до свидания", "всего доброго",
+            "всего хорошего", "goodbye", "bye", "have a nice day", "have a great day")
+HANGUP_DELAY = 1.2  # seconds of quiet after the goodbye so Telegram plays its last syllable
+
+
+def says_goodbye(text):
+    tail = text.casefold().translate(str.maketrans("", "", "'’‘ʻʼ`"))[-80:]
+    return any(phrase in tail for phrase in GOODBYES)
 LANGUAGE_STYLE = (
     "Speak only Uzbek, Russian, or English. Match the caller's language among these three. "
     "If another language is clearly spoken, ask once in Uzbek, then in short English if needed: "
-    "O?zbekcha, ruscha yoki inglizcha gaplasha olasizmi? Do not respond in other languages."
+    "O‘zbekcha, ruscha yoki inglizcha gaplasha olasizmi? Do not respond in other languages."
 )
 
 
@@ -100,6 +110,7 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                     activity_handling="START_OF_ACTIVITY_INTERRUPTS",
                 ),
                 input_audio_transcription=types.AudioTranscriptionConfig(),
+                output_audio_transcription=types.AudioTranscriptionConfig(),
                 tools=[types.Tool(function_declarations=[types.FunctionDeclaration(
                     name="outbound_result",
                     description="Report the explicit customer answer and finish the call.",
@@ -208,68 +219,75 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                         speech_samples = silence_samples = 0
                         await session.send_realtime_input(activity_end=types.ActivityEnd())
 
+            outbound_result = {}
+
+            def handle_tool(call):
+                # Runs in a worker thread so SQLite work never stalls audio playback on the event loop.
+                nonlocal saved, ending, outbound_answer, outbound_result
+                args = call.args or {}
+                service = args.get("service")
+                if outbound and call.name == "outbound_result":
+                    if not ending:
+                        outbound_answer = args.get("answer", "unclear")
+                        outbound_result = outbound["answer"](outbound_answer)
+                        ending = True
+                    return outbound_result
+                if not outbound and call.name == "quote":
+                    label, low, high = TARIFFS[service if service in services else default_service]
+                    worker, duration = staff(label)
+                    day = str(args.get("date") or "")
+                    requested_time = str(args.get("time") or "")
+                    exact = f"{day}T{requested_time}" if day and requested_time else None
+                    error = check_slot(label, exact, request_id) if exact else None
+                    return {"service": label, "min_uzs": low, "max_uzs": high,
+                            "resource": worker, "minutes": duration, "deposit_uzs": deposit_for(label),
+                            "checked_date": day or None,
+                            "requested_slot": exact, "requested_slot_available": not error if exact else None,
+                            "unavailable_reason": error,
+                            "free_slots": available_slots(label, day, request_id)[:36]}
+                if call.name not in ("save_details", "finish_call"):
+                    return {"error": "Unknown action"}
+                confirmed, guests, until, missing = booking_fields(args, business)
+                ending = call.name == "finish_call" and (not missing or args.get("wants_visit") is not True)
+                if str(args.get("issue", "")).strip() and (confirmed or not saved or not saved[1]):
+                    saved = save_request(
+                        caller_id, username, str(args.get("car") or "Noma'lum")[:100],
+                        str(args["issue"])[:1000], service if service in services else default_service,
+                        confirmed, str(args.get("phone") or "")[:40],
+                        request_id=request_id, visit_time=str(args.get("visit_time") or ""),
+                        visit_date=str(args.get("visit_date") or ""), business=business,
+                        guests=guests, visit_until=until,
+                        menu_items=args.get("menu_items") if isinstance(args.get("menu_items"), list) else None,
+                    )
+                reason = str(args.get("callback_reason") or "").strip()
+                if request_id:
+                    record_contact_preferences(
+                        request_id, args.get("allow_call"), args.get("join_waitlist"), args.get("language"),
+                    )
+                if request_id and reason:
+                    queue_callback(request_id, reason[:300])
+                result = {"saved": saved is not None}
+                if saved:
+                    result["saved_visit"] = saved[1]
+                    if saved[1] and "T" in saved[1]:
+                        result["availability_error"] = check_slot(saved[2], saved[1], request_id)
+                if missing:
+                    result["instruction"] = missing
+                elif ending:
+                    result["instruction"] = "Say goodbye now."
+                return result
+
             async def receive():
-                nonlocal turn_complete, saved, ending, goodbye_audio, outbound_answer
-                outbound_result = {}
+                nonlocal turn_complete, goodbye_audio, ending
                 announced = False
+                spoken = ""
                 while True:
                     async for response in session.receive():
                         if response.tool_call:
                             replies = []
                             for call in response.tool_call.function_calls:
-                                args = call.args or {}
-                                service = args.get("service")
-                                if outbound and call.name == "outbound_result":
-                                    if not ending:
-                                        outbound_answer = args.get("answer", "unclear")
-                                        outbound_result = outbound["answer"](outbound_answer)
-                                        ending = True
-                                    result = outbound_result
-                                elif not outbound and call.name == "quote":
-                                    label, low, high = TARIFFS[service if service in services else default_service]
-                                    worker, duration = staff(label)
-                                    day = str(args.get("date") or "")
-                                    requested_time = str(args.get("time") or "")
-                                    exact = f"{day}T{requested_time}" if day and requested_time else None
-                                    error = check_slot(label, exact, request_id) if exact else None
-                                    result = {"service": label, "min_uzs": low, "max_uzs": high,
-                                              "resource": worker, "minutes": duration, "deposit_uzs": deposit_for(label),
-                                              "checked_date": day or None,
-                                              "requested_slot": exact, "requested_slot_available": not error if exact else None,
-                                              "unavailable_reason": error,
-                                              "free_slots": available_slots(label, day, request_id)[:36]}
-                                elif call.name in ("save_details", "finish_call"):
-                                    confirmed, guests, until, missing = booking_fields(args, business)
-                                    ending = call.name == "finish_call" and (not missing or args.get("wants_visit") is not True)
-                                    if str(args.get("issue", "")).strip() and (confirmed or not saved or not saved[1]):
-                                        saved = save_request(
-                                            caller_id, username, str(args.get("car") or "Noma'lum")[:100],
-                                            str(args["issue"])[:1000], service if service in services else default_service,
-                                            confirmed, str(args.get("phone") or "")[:40],
-                                            request_id=request_id, visit_time=str(args.get("visit_time") or ""),
-                                            visit_date=str(args.get("visit_date") or ""), business=business,
-                                            guests=guests, visit_until=until,
-                                            menu_items=args.get("menu_items") if isinstance(args.get("menu_items"), list) else None,
-                                        )
-                                    reason = str(args.get("callback_reason") or "").strip()
-                                    if request_id:
-                                        record_contact_preferences(
-                                            request_id, args.get("allow_call"), args.get("join_waitlist"),
-                                            args.get("language"),
-                                        )
-                                    if request_id and reason:
-                                        queue_callback(request_id, reason[:300])
-                                    result = {"saved": saved is not None}
-                                    if saved:
-                                        result["saved_visit"] = saved[1]
-                                        if saved[1] and "T" in saved[1]:
-                                            result["availability_error"] = check_slot(saved[2], saved[1], request_id)
-                                    if missing:
-                                        result["instruction"] = missing
-                                    elif ending:
-                                        result["instruction"] = "Say goodbye now."
-                                else:
-                                    result = {"error": "Unknown action"}
+                                print(f"Tool call: {call.name}.", flush=True)
+                                result = await asyncio.to_thread(handle_tool, call)
                                 replies.append(types.FunctionResponse(id=call.id, name=call.name, response=result))
                             turn_complete = False
                             await session.send_tool_response(function_responses=replies)
@@ -278,6 +296,8 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                             continue
                         if content.input_transcription and content.input_transcription.text:
                             transcript.append(content.input_transcription.text)
+                        if content.output_transcription and content.output_transcription.text:
+                            spoken += content.output_transcription.text
                         if content.interrupted:
                             outgoing.clear()
                             audio_ready.set()
@@ -291,13 +311,18 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                                     if ending:
                                         goodbye_audio = True
                                     outgoing.extend(to_telegram(part.inline_data.data))
-                                    if greeting_ready is not None and len(outgoing) >= 960 * PLAYBACK_BUFFER_FRAMES:
-                                        greeting_ready.set()
                                     audio_ready.set()
 
                         if content.turn_complete:
                             save_transcript()
-                            if greeting_ready is not None and outgoing:
+                            if greeting_ready is not None and greeting_ready.is_set() and says_goodbye(spoken):
+                                if not ending:
+                                    print("Assistant said goodbye; hanging up after it finishes.", flush=True)
+                                ending = goodbye_audio = True
+                            spoken = ""
+                            # The whole greeting is buffered before Telegram picks up, so it plays the moment the call connects.
+                            if greeting_ready is not None and outgoing and not greeting_ready.is_set():
+                                print("Greeting ready.", flush=True)
                                 greeting_ready.set()
                             turn_complete = True
                             audio_ready.set()
@@ -321,7 +346,10 @@ async def talk(calls, caller_id, incoming, config, username=None, request_id=Non
                         deadline = max(deadline + 0.01, loop.time())
                         await asyncio.sleep(max(0, deadline - loop.time()))
                     if ending and goodbye_audio and turn_complete and not outgoing:
-                        finished.set()
+                        await asyncio.sleep(HANGUP_DELAY)
+                        if not outgoing:
+                            print("Goodbye played; robot is hanging up.", flush=True)
+                            finished.set()
 
             try:
                 async with asyncio.timeout(55 if outbound else 300), asyncio.TaskGroup() as tasks:

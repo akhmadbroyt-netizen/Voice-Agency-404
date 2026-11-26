@@ -7,7 +7,7 @@
 
 **404 jamoasi yaratgan o‘zbekcha ovozli avtoservis yordamchisi.** Mijoz Telegram orqali qo‘ng‘iroq qiladi. AI mijozning tiliga moslashadi, muammoni eshitadi, ustaga kerakli tafsilotlarni so‘raydi va tashrif so‘rovini kalendarga yozadi. Usta sayt orqali so‘rovni qabul qiladi, rad etadi yoki boshqa vaqt taklif qiladi.
 
-[Final taqdimot va video](https://drive.google.com/drive/folders/18oKNS8oeazvJrhctXxpkJiDIkqKZArZ7) · [Pitch deck](docs/pitch-deck.html) · [Windows ishga tushirgichi](start-demo.bat) · [Demo ssenariysi](#-hakamlar-uchun-sinov)
+[Final taqdimot va video](https://drive.google.com/drive/folders/18oKNS8oeazvJrhctXxpkJiDIkqKZArZ7) · [Kod qo‘llanmasi](docs/CODE.md) · [Pitch deck](docs/pitch-deck.html) · [Windows ishga tushirgichi](start-demo.bat) · [Demo ssenariysi](#-hakamlar-uchun-sinov)
 
 ![Restoran dashboardi, kunduzgi rejim va demo bron](docs/restaurant-day.jpg)
 
@@ -46,8 +46,13 @@ Demo tariflari ko‘rik yoki ish haqi uchun. Detal va yakuniy ta’mir narxi ust
 | `gemini_voice.py` va `operator-prompt.md` | Jonli suhbat, mijoz gapirganda AI ovozini to‘xtatish, tarifni olish va so‘rovni yozish. |
 | `service_desk.py` | SQLite, tariflar, vaqt tekshiruvi, Telegram xabar navbati va lokal HTTP API. |
 | `dashboard.html` | Monochrome haftalik kalendar, qo‘ng‘iroqlar tarixi va usta amallari. |
+| `business_profiles.py` | Beshta yo‘nalish, 13 ta demo xizmat, narxlar, ustalar va ish vaqti. |
+| `hold_audio.py` | Ikkinchi qo‘ng‘iroq uchun kutish e’loni va musiqasi. |
+| `test_service_desk.py` | Jadval, taklif kodlari va xavfsizlik uchun 10 ta test. |
 
-`GET /api/requests` kalendar va tarixni yangilaydi. `POST /api/decision` usta qarorini saqlaydi. Telegram javobi jo‘natuvchi va taklif bo‘yicha tekshiriladi. Suhbat savollarini tuzishda mahalliy servisning ochiq yozilish jarayonidan foydalandik. [Olamavto](https://olamavto.uz/uz/service)
+Har bir funksiya, qo‘ng‘iroq bosqichlari, API va kelajak rejasi [docs/CODE.md](docs/CODE.md) da batafsil yozilgan.
+
+`GET /api/requests` kalendar va tarixni yangilaydi. `GET /api/live` hozirgi jonli qo‘ng‘iroqni qaytaradi. `POST /api/decision` usta qarorini saqlaydi. Telegram javobi jo‘natuvchi va taklif bo‘yicha tekshiriladi. Suhbat savollarini tuzishda mahalliy servisning ochiq yozilish jarayonidan foydalandik. [Olamavto](https://olamavto.uz/uz/service)
 
 ## 🚧 Prototipdan katta workflow’gacha
 
@@ -97,9 +102,9 @@ O‘zbekcha, ruscha va inglizcha. AI qisqa o‘zbekcha salomdan keyin mijoz gapi
 
 ## Video va texnik taqdimot
 
-[Final PDF](docs/final-pitch.pdf) · [Final video · Full HD, 60 fps, 2:00](https://drive.google.com/file/d/16a6_jTmgM1yKxtNCdHnX1BpOeBiPLaJs/view) · [GitHub’dagi video nusxasi (720p)](docs/404-final.mp4) · [Texnik pitch](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
+[Taqdimot PDF](docs/final-pitch.pdf) · [Final video · Full HD, 1:28](https://drive.google.com/drive/folders/18oKNS8oeazvJrhctXxpkJiDIkqKZArZ7) · [GitHub’dagi video nusxasi](docs/404-final.mp4) · [Texnik pitch](docs/technical-pitch.html) · [v0.1 dan beri o‘zgarishlar](CHANGELOG.md)
 
-Final videoda 404 jamoasi prototipni qo‘ng‘iroqdan kalendargacha ko‘rsatadi. Restoran sahnasida haqiqiy dashboard demo ma’lumotlari bilan ishlatilgan.
+Video 3D sahnalar bilan loyiha qanday ishlashini ko‘rsatadi: tungi javobsiz qo‘ng‘iroq, AI bilan suhbat, bo‘sh vaqt tekshiruvi, bron, dashboard’da qabul qilish va Telegram tasdig‘i. Suhbat ovozlari Voicelab TTS bilan sahnalashtirilgan. Dashboard kadrlari demo ma’lumotlar bilan olingan.
 
 ## Ikkinchi kiruvchi qo‘ng‘iroq uchun kutish musiqasi
 

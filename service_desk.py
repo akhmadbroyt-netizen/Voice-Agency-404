@@ -4,6 +4,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 import sqlite3
+from threading import Lock
 from uuid import uuid4
 
 from business_profiles import BUSINESSES, BY_LABEL, CATALOG
@@ -15,12 +16,57 @@ WORKERS = {key: item[4:6] for key, item in CATALOG.items()}
 SERVICE_STAFF = {label: item[4:6] for label, item in BY_LABEL.items()}
 DB = ROOT / ".data" / "service.sqlite3"
 PORT = 8744
+LOCAL_HOSTS = (f"127.0.0.1:{PORT}", f"localhost:{PORT}")
+LOCAL_ORIGINS = tuple("http://" + host for host in LOCAL_HOSTS)
+
+# The robot and the dashboard run in one process, so the live call lives in memory.
+_live_lock = Lock()
+_live = {}
+
+
+def set_live_call(caller_id, request_id=None, direction="inbound"):
+    with _live_lock:
+        _live.clear()
+        _live.update(caller_id=caller_id, request_id=request_id, direction=direction,
+                     since=datetime.now(UZ).isoformat(timespec="seconds"))
+
+
+def clear_live_call(caller_id=None):
+    with _live_lock:
+        if caller_id is None or _live.get("caller_id") == caller_id:
+            _live.clear()
+
+
+def live_call():
+    with _live_lock:
+        return dict(_live, active=bool(_live))
+
+
+_schema_ready = set()
+_schema_lock = Lock()
 
 
 def database():
-    DB.parent.mkdir(exist_ok=True)
-    connection = sqlite3.connect(DB)
+    # Schema checks run once per database file, not on every 2.5 s dashboard poll or AI tool call.
+    key = str(DB)
+    if key not in _schema_ready:
+        with _schema_lock:
+            if key not in _schema_ready:
+                DB.parent.mkdir(parents=True, exist_ok=True)
+                with closing(migrate(open_connection())):
+                    pass
+                _schema_ready.add(key)
+    return open_connection()
+
+
+def open_connection():
+    connection = sqlite3.connect(DB, timeout=10)
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA synchronous=NORMAL")
+    return connection
+
+
+def migrate(connection):
     connection.execute("""CREATE TABLE IF NOT EXISTS requests (
         id TEXT PRIMARY KEY, created TEXT NOT NULL, visit TEXT,
         caller_id INTEGER NOT NULL, username TEXT, phone TEXT,
@@ -158,39 +204,56 @@ def save_transcript_note(request_id, text):
                            (text, request_id, "Qo'ng'iroq"))
 
 
+def request_rows():
+    with closing(database()) as connection:
+        rows = connection.execute("SELECT r.*, d.status, d.slot, d.delivery, d.previous_slot, d.move_requested, d.reminder, c.reason AS callback, c.done AS callback_done, x.worker AS assigned_worker, x.consent, x.waitlist, x.attendance, COALESCE(b.business, 'auto') AS business, COALESCE(b.deposit_paid, 0) AS deposit_paid, b.guests, b.visit_until, b.menu_items, l.language FROM requests r LEFT JOIN request_business b ON b.request_id=r.id LEFT JOIN decisions d ON d.request_id = r.id LEFT JOIN callbacks c ON c.request_id = r.id LEFT JOIN dispatch x ON x.request_id = r.id LEFT JOIN request_languages l ON l.request_id = r.id ORDER BY r.created DESC").fetchall()
+    return [dict(row, worker=row["assigned_worker"] or staff(row["service"])[0], duration=staff(row["service"])[1],
+                 deposit=deposit_for(row["service"]), menu_items=json.loads(row["menu_items"] or "[]"))
+            for row in rows]
+
+
 class Dashboard(BaseHTTPRequestHandler):
+    def send_body(self, status, body, content_type="application/json; charset=utf-8"):
+        if not isinstance(body, bytes):
+            body = json.dumps(body, ensure_ascii=False).encode()
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
+        # Reject other Host names so a rebinding page cannot read customer data.
+        if self.headers.get("Host") not in LOCAL_HOSTS:
+            self.send_error(403)
+            return
+        content_type = "application/json; charset=utf-8"
         if self.path == "/":
             body = (ROOT / "dashboard.html").read_bytes()
             content_type = "text/html; charset=utf-8"
+        elif self.path == "/api/live":
+            body = live_call()
         elif self.path == "/api/business":
-            body = json.dumps({"active": active_business(), "profiles": [
+            body = {"active": active_business(), "profiles": [
                 dict(id=key, name=profile.name, resource=profile.resource,
                      opens=profile.opens, closes=profile.closes,
                      resources=list(dict.fromkeys(CATALOG[item][4] for item in profile.services(key))),
                      services=[dict(id=item, label=CATALOG[item][1], resource=CATALOG[item][4])
                                for item in profile.services(key)])
                 for key, profile in BUSINESSES.items()
-            ]}, ensure_ascii=False).encode()
-            content_type = "application/json; charset=utf-8"
+            ]}
         elif self.path == "/api/requests":
-            with closing(database()) as connection:
-                rows = connection.execute("SELECT r.*, d.status, d.slot, d.delivery, d.previous_slot, d.move_requested, d.reminder, c.reason AS callback, c.done AS callback_done, x.worker AS assigned_worker, x.consent, x.waitlist, x.attendance, COALESCE(b.business, 'auto') AS business, COALESCE(b.deposit_paid, 0) AS deposit_paid, b.guests, b.visit_until, b.menu_items FROM requests r LEFT JOIN request_business b ON b.request_id=r.id LEFT JOIN decisions d ON d.request_id = r.id LEFT JOIN callbacks c ON c.request_id = r.id LEFT JOIN dispatch x ON x.request_id = r.id ORDER BY r.created DESC")
-                body = json.dumps([dict(row, worker=row["assigned_worker"] or staff(row["service"])[0], duration=staff(row["service"])[1], deposit=deposit_for(row["service"]), menu_items=json.loads(row["menu_items"] or "[]")) for row in rows], ensure_ascii=False).encode()
-            content_type = "application/json; charset=utf-8"
+            body = request_rows()
         else:
             self.send_error(404)
             return
-        self.send_response(200)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        self.send_body(200, body, content_type)
 
     def do_POST(self):
         if (self.path not in ("/api/decision", "/api/business") or self.headers.get_content_type() != "application/json"
-                or self.headers.get("Origin") not in (f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}")):
+                or self.headers.get("Host") not in LOCAL_HOSTS or self.headers.get("Origin") not in LOCAL_ORIGINS):
             self.send_error(403)
             return
         try:
@@ -205,10 +268,7 @@ class Dashboard(BaseHTTPRequestHandler):
             body, status = {"ok": True}, 200
         except (ValueError, KeyError, TypeError) as error:
             body, status = {"error": str(error)}, 400
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(json.dumps(body).encode())
+        self.send_body(status, body)
 
     def log_message(self, *args):
         pass
@@ -321,28 +381,32 @@ def assigned_staff(connection, service, request_id):
     return row["worker"] if row and row["worker"] else staff(service)[0]
 
 
-def slot_available(connection, service, slot, exclude=None, worker_override=None):
-    _, duration = staff(service)
-    worker = worker_override or assigned_staff(connection, service, exclude)
-    start = datetime.fromisoformat(slot)
-    end = start + timedelta(minutes=duration)
-    rows = connection.execute("""SELECT d.slot, d.previous_slot, r.service, d.request_id FROM decisions d
-        JOIN requests r ON r.id=d.request_id WHERE d.status IN ('accepted','offered')
-        AND d.request_id IS NOT ?""", (exclude,))
+def reserved_intervals(connection, exclude=None):
+    """All held time ranges as (worker, start, end), loaded with one query."""
+    rows = connection.execute("""SELECT d.slot, d.previous_slot, r.service, x.worker FROM decisions d
+        JOIN requests r ON r.id=d.request_id LEFT JOIN dispatch x ON x.request_id=d.request_id
+        WHERE d.status IN ('accepted','offered') AND d.request_id IS NOT ?""", (exclude,))
+    intervals = []
     for row in rows:
-        _, other_duration = staff(row["service"])
-        other_worker = assigned_staff(connection, row["service"], row["request_id"])
-        if worker != other_worker:
-            continue
+        default_worker, duration = staff(row["service"])
         for value in (row["slot"], row["previous_slot"]):
             if value:
-                other = datetime.fromisoformat(value)
-                if start < other + timedelta(minutes=other_duration) and other < end:
-                    return False
-    return True
+                start = datetime.fromisoformat(value)
+                intervals.append((row["worker"] or default_worker, start, start + timedelta(minutes=duration)))
+    return intervals
 
 
-def booking_error(connection, service, slot, request_id=None):
+def slot_available(connection, service, slot, exclude=None, worker_override=None, intervals=None):
+    worker = worker_override or assigned_staff(connection, service, exclude)
+    start = datetime.fromisoformat(slot)
+    end = start + timedelta(minutes=staff(service)[1])
+    if intervals is None:
+        intervals = reserved_intervals(connection, exclude)
+    return not any(other == worker and start < other_end and other_start < end
+                   for other, other_start, other_end in intervals)
+
+
+def booking_error(connection, service, slot, request_id=None, worker=None, intervals=None):
     try:
         when = datetime.fromisoformat(slot or "")
         if len(slot) != 16 or when.tzinfo or when.replace(tzinfo=UZ) <= datetime.now(UZ):
@@ -353,7 +417,7 @@ def booking_error(connection, service, slot, request_id=None):
     end = when + timedelta(minutes=staff(service)[1])
     if when.time() < time(profile.opens) or end > when.replace(hour=profile.closes, minute=0):
         return f"Ish vaqti {profile.opens:02}:00 dan {profile.closes:02}:00 gacha."
-    if not slot_available(connection, service, slot, request_id):
+    if not slot_available(connection, service, slot, request_id, worker, intervals):
         return f"{profile.resource} bu vaqtda band."
     return None
 
@@ -370,12 +434,14 @@ def available_slots(service, requested_date="", request_id=None):
         return []
     profile = business_for(service)
     with closing(database()) as connection:
+        worker = assigned_staff(connection, service, request_id)
+        intervals = reserved_intervals(connection, request_id)
         options = []
         for offset in range(1 if requested_date else 4):
             for index in range(profile.opens * 2, profile.closes * 2):
                 candidate = datetime.combine(day + timedelta(days=offset), time(index // 2, index % 2 * 30))
                 slot = candidate.isoformat(timespec="minutes")
-                if not booking_error(connection, service, slot, request_id):
+                if not booking_error(connection, service, slot, request_id, worker, intervals):
                     options.append(slot)
         return options
 

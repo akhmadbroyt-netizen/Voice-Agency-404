@@ -1,5 +1,24 @@
 # O‘zgarishlar tarixi
 
+## v0.6 · Tezkor salom, avtomatik go‘shak va to‘liq hujjatlar
+
+- Salom go‘shak ko‘tarilishidan oldin to‘liq tayyorlanadi. Telefon Gemini ulanguncha jiringlab turadi, mijoz ulanishi bilan salom darhol eshitiladi. Gemini ulanmasa, qo‘ng‘iroq jim qoldirilmaydi, rad etiladi.
+- AI xayrlashgandan keyin o‘zi go‘shakni qo‘yadi. `finish_call` chaqirilmasa ham, xayrlashuv iborasi (o‘zbek, rus, ingliz) oxirgi bo‘g‘in eshitilgach qo‘ng‘iroqni yopadi.
+- `start-demo.bat` endi kalitlarni faqat yetishmaganda so‘raydi, paketlarni faqat o‘zgarganda o‘rnatadi va Telegram aloqasi uzilsa avtomatik qayta ulanadi. Konsol logi `.data/robot.log` ga yoziladi.
+- [Kod qo‘llanmasi](docs/CODE.md): har bir fayl va funksiya, qo‘ng‘iroq bosqichlari, API va kelajak rejasi.
+- Yangi 3D video (1:28) va to‘liq tushuntirilgan taqdimot PDF.
+
+## v0.5 · Jonli qo‘ng‘iroq paneli va xavfsizroq dashboard
+
+- Dashboard tepasida jonli qo‘ng‘iroq paneli: kim gaplashayotgani, suhbat vaqti va «Kartani ochish» tugmasi. AI mijozga o‘zi qo‘ng‘iroq qilganda ham ko‘rinadi. Brauzer sarlavhasida ● belgisi yoki javob kutayotgan murojaatlar soni chiqadi.
+- Murojaatlarni ism, model, telefon, muammo yoki taom bo‘yicha qidirish. Kartada mijoz tili ko‘rsatiladi. Yangi «Konversiya» ko‘rsatkichi bugungi qo‘ng‘iroqlarning tashrifga aylangan ulushini beradi.
+- Xodim kartada yozib turganda fon yangilanishi tahrirni o‘chirmaydi. Amal bajarilgach kalendar darhol yangilanadi.
+- Mijoz KOCHIR kodini yozsa, Telegramdan qabul qilingani haqida javob oladi. Noto‘g‘ri kod yuborilsa, kodni tekshirish so‘raladi. Oddiy «ha» xabarlariga javob qaytarilmaydi.
+- Ovozli yordamchi ko‘rsatmalaridagi buzilgan belgilar («o?zbek» → «o‘zbek») tuzatildi, shu sababli model matnni to‘g‘ri o‘qiydi.
+- Lokal server faqat `127.0.0.1` va `localhost` Host nomlariga javob beradi, bu DNS rebinding orqali mijoz ma’lumotlarini o‘qishni to‘sadi. Testlar 7 tadan 10 taga ko‘paydi.
+- Tezroq: bo‘sh vaqtlarni hisoblash 11.5 ms dan 0.8 ms gacha tushdi (40 ta bron bilan o‘lchandi), baza ulanishi 0.64 ms dan 0.14 ms gacha. Jadval tekshiruvi har so‘rovda emas, bir marta bajariladi. AI vositalari bazaga alohida oqimda murojaat qiladi, shuning uchun jonli suhbatda ovoz to‘xtab qolmaydi.
+- Yangi monochrome dizayn: Archivo shrifti, keng va katta yo‘nalish sarlavhasi, tab ko‘rinishidagi yo‘nalishlar, bitta chiziqdagi ko‘rsatkichlar paneli va jonli qo‘ng‘iroq uchun ovoz to‘lqini. Kalendarda holat shakl bilan ajraladi: tasdiqlangan to‘liq, taklif qilingan punktir, rad etilgan ustidan chizilgan. Hozirgi soat qatori belgilanadi. Taklif qilingan vaqt kalendarda o‘z vaqtida ko‘rinadi.
+
 ## v0.4 · Beshta xizmat va restoran bronlari
 
 - Beshta yo‘nalish bitta dashboardda, har birining alohida kalendari, xizmatlari, narxlari va AI savollari bor.

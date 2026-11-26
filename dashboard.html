@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="uz"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Voice Agency 404 · Avtoservis</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&display=swap">
 <script>
 try {
   const saved = localStorage.getItem('voice404-theme');
@@ -14,142 +14,205 @@ try {
 <style>
 :root {
   color-scheme: dark;
-  --canvas: #0d0d0d;
-  --panel: #151515;
-  --raised: #1c1c1c;
-  --line: #292929;
-  --muted: #a5a5a5;
-  --ink: #f4f4f4;
-  --inverse: #171717;
-  --interactive: #202020;
-  --hover: #303030;
-  --border-control: #565656;
-  --calendar-head: #1b1b1b;
+  --canvas: #000;
+  --panel: #0e0e0e;
+  --raised: #171717;
+  --line: #262626;
+  --line-strong: #3d3d3d;
+  --muted: #9a9a9a;
+  --ink: #fff;
+  --inverse: #000;
+  --interactive: #121212;
+  --hover: #1f1f1f;
+  --border-control: #4a4a4a;
+  --calendar-head: #0e0e0e;
   --focus: #fff;
-  --mono: "IBM Plex Mono", Consolas, monospace;
-  --sans: "Geist", "Segoe UI", sans-serif;
+  --sans: "Archivo", "Segoe UI", system-ui, sans-serif;
 }
 :root[data-theme=day] {
   color-scheme: light;
-  --canvas: #eeeeed;
+  --canvas: #f2f2f2;
   --panel: #fff;
-  --raised: #f0f0ef;
-  --line: #d6d6d5;
-  --muted: #545453;
-  --ink: #171716;
+  --raised: #f5f5f5;
+  --line: #dcdcdc;
+  --line-strong: #b5b5b5;
+  --muted: #5c5c5c;
+  --ink: #000;
   --inverse: #fff;
-  --interactive: #f5f5f4;
-  --hover: #e5e5e4;
-  --border-control: #929290;
-  --calendar-head: #efefee;
-  --focus: #242424;
+  --interactive: #fff;
+  --hover: #ececec;
+  --border-control: #9e9e9e;
+  --calendar-head: #fff;
+  --focus: #000;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--canvas); color: var(--ink); font: 14px/1.5 var(--sans); }
-header, main { width: min(100% - 64px, 1460px); margin-inline: auto; }
-header { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
-.brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 650; letter-spacing: -.025em; }
-.brand-mark { display: grid; place-items: center; width: 49px; height: 34px; border-radius: 8px; background: var(--ink); color: var(--inverse); font: 600 16px var(--mono); }
-#status { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; color: var(--muted); font-size: 12px; }
-#status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #888; }
-#status[data-live="true"]::before { background: var(--ink); box-shadow: 0 0 0 3px #f4f4f41c; }
-main { padding-block: 38px 48px; }
-h1, h2, p { margin: 0; }
-h1 { font-size: clamp(42px, 5vw, 68px); line-height: 1; letter-spacing: -.075em; font-weight: 600; margin-bottom: 12px; }
-h2 { font-size: 16px; line-height: 1.3; letter-spacing: -.025em; font-weight: 650; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 14px/1.5 var(--sans); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+header, main { width: min(100% - 64px, 1480px); margin-inline: auto; }
+h1, h2, h3, p { margin: 0; }
 .muted, dt { color: var(--muted); }
-.metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-block: 28px 18px; }
-.metric { display: flex; flex-direction: column-reverse; justify-content: space-between; gap: 10px; min-height: 100px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--muted); font-size: 13px; }
-.metric strong { color: var(--ink); font: 500 29px/1 var(--mono); letter-spacing: -.07em; }
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 340px); gap: 14px; align-items: start; }
-section, aside { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
-.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 15px; border-bottom: 1px solid var(--line); }
-.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
-button, select, input { min-height: 36px; border: 1px solid var(--border-control); border-radius: 8px; background: var(--interactive); color: var(--ink); font: 550 13px/1.25 var(--sans); padding: 6px 10px; }
+
+/* Header */
+header { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px; }
+.brand-mark { display: grid; place-items: center; min-width: 46px; height: 30px; padding: 0 8px; background: var(--ink); color: var(--inverse); font-weight: 800; font-size: 15px; font-stretch: 125%; letter-spacing: -.02em; }
+.header-actions { display: flex; gap: 14px; align-items: center; }
+.theme-switch { display: flex; padding: 2px; border: 1px solid var(--line-strong); border-radius: 999px; }
+.theme-switch button { min-height: 28px; padding: 3px 12px; border: 0; border-radius: 999px; background: transparent; font-weight: 500; }
+.theme-switch button[aria-pressed=true] { background: var(--ink); color: var(--inverse); }
+#status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+#status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--muted); }
+#status[data-live="true"]::before { background: var(--ink); border-color: var(--ink); }
+#status[data-live="false"] { color: var(--ink); text-decoration: line-through; }
+
+/* Business lines: tabs, the active line is underlined */
+#businessBar { display: flex; gap: 2px; overflow-x: auto; margin: 0; border-block: 1px solid var(--line); scrollbar-width: none; }
+#businessBar button { display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 48px; padding: 0 16px; border: 0; border-radius: 0; background: transparent; color: var(--muted); font-weight: 500; box-shadow: inset 0 -2px transparent; }
+#businessBar button:hover { color: var(--ink); background: transparent; }
+#businessBar [aria-pressed=true] { color: var(--ink); box-shadow: inset 0 -2px var(--ink); }
+#businessBar svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+#businessBar button:disabled { opacity: .5; }
+
+main { padding-block: 0 56px; }
+
+/* Hero: the business name is the loudest thing on the page */
+#workspaceHero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 24px; padding: 44px 0 28px; }
+h1 { font-size: clamp(44px, 8.4vw, 128px); line-height: .86; font-weight: 800; font-stretch: 125%; letter-spacing: -.045em; margin-bottom: 18px; overflow-wrap: anywhere; }
+#businessSubtitle { font-size: 16px; max-width: 46ch; }
+#roomFilters { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+#roomFilters:empty { display: none; }
+#roomFilters button { border-radius: 999px; }
+#roomFilters [aria-pressed=true] { background: var(--ink); color: var(--inverse); border-color: var(--ink); }
+#businessFeedback:empty { display: none; }
+#businessFeedback { margin-bottom: 16px; }
+
+/* Live call: the one moving thing on the page */
+#live { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px 20px; margin: 0 0 20px; padding: 14px 18px; background: var(--ink); color: var(--inverse); }
+#live[hidden] { display: none; }
+#live .pulse { display: flex; align-items: center; gap: 3px; height: 22px; }
+#live .pulse i { display: block; width: 3px; height: 100%; background: currentColor; transform-origin: center; animation: wave 1.1s ease-in-out infinite; }
+#live .pulse i:nth-child(2) { animation-delay: -.9s; }
+#live .pulse i:nth-child(3) { animation-delay: -.6s; }
+#live .pulse i:nth-child(4) { animation-delay: -.3s; }
+#live .pulse i:nth-child(5) { animation-delay: -.75s; }
+@keyframes wave { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+#live strong { font-weight: 700; font-stretch: 125%; font-size: 15px; }
+#liveWho { opacity: .75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#liveTimer { font-weight: 600; font-size: 20px; letter-spacing: -.02em; }
+#liveOpen { background: var(--inverse); color: var(--ink); border-color: var(--inverse); border-radius: 999px; }
+#liveOpen:hover { background: var(--inverse); opacity: .85; }
+
+/* Metrics: one instrument strip, conversion is the only inverted reading */
+.metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0 0 20px; border: 1px solid var(--line); background: var(--panel); }
+.metric { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 6px; padding: 18px 18px 16px; border-left: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.metric:first-child { border-left: 0; }
+.metric strong { color: var(--ink); font-weight: 700; font-size: 40px; line-height: 1; font-stretch: 125%; letter-spacing: -.04em; }
+.metric:nth-child(3) { background: var(--ink); color: var(--inverse); }
+.metric:nth-child(3) strong { color: var(--inverse); }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 380px); gap: 20px; align-items: start; }
+section, aside { min-width: 0; overflow: hidden; border: 1px solid var(--line); background: var(--panel); }
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+h2 { font-size: 18px; line-height: 1.2; font-weight: 700; font-stretch: 112%; letter-spacing: -.02em; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+/* Controls */
+button, select, input { min-height: 36px; border: 1px solid var(--border-control); border-radius: 6px; background: var(--interactive); color: var(--ink); font: 500 13px/1.2 var(--sans); padding: 6px 12px; }
 button, select { cursor: pointer; }
-button { transition: background-color 140ms, border-color 140ms, transform 140ms; }
-button:hover { background: var(--hover); border-color: var(--border-control); }
+button { transition: background-color 120ms, color 120ms, border-color 120ms; }
+button:hover { background: var(--hover); }
 button:active { transform: translateY(1px); }
 button:focus-visible, summary:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-button:disabled { cursor: wait; opacity: .65; }
-#today, .primary { background: var(--ink); border-color: var(--ink); color: var(--inverse); }
-#today:hover, .primary:hover { filter: contrast(.8); }
-#prev, #next { min-width: 36px; font-size: 17px; }
-.schedule, #history { max-height: min(65vh, 690px); overflow: auto; scrollbar-color: #494949 transparent; }
-.grid { display: grid; grid-template-columns: 64px repeat(7, minmax(91px, 1fr)); min-width: 701px; }
-.heading { position: sticky; top: 0; z-index: 1; display: grid; place-content: center; min-height: 52px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: var(--calendar-head); text-align: center; }
-.heading[aria-current=date] { box-shadow: inset 0 -2px var(--ink); }
+button:disabled { cursor: wait; opacity: .55; }
+#today, .primary { background: var(--ink); border-color: var(--ink); color: var(--inverse); font-weight: 600; }
+#today:hover, .primary:hover { background: var(--ink); opacity: .85; }
+#prev, #next { min-width: 36px; padding: 6px; font-size: 16px; }
+
+/* Calendar */
+.schedule, #history { max-height: min(66vh, 720px); overflow: auto; scrollbar-color: var(--line-strong) transparent; }
+.grid { display: grid; grid-template-columns: 60px repeat(7, minmax(92px, 1fr)); min-width: 704px; }
+.heading { position: sticky; top: 0; z-index: 1; display: grid; place-content: center; min-height: 52px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: var(--calendar-head); color: var(--muted); font-weight: 500; text-align: center; }
+.heading:hover { color: var(--ink); background: var(--calendar-head); }
+.heading[aria-current=date] { color: var(--ink); font-weight: 700; box-shadow: inset 0 -3px var(--ink); }
 .heading[aria-pressed=true] { background: var(--ink); color: var(--inverse); }
 .clock, .slot { min-height: 48px; border-bottom: 1px solid var(--line); padding: 6px; }
-.clock { padding: 8px 7px; }
-.clock, .stamp, .heading:first-child { font: 400 11px/1.4 var(--mono); color: var(--muted); }
+.clock { padding: 7px 8px; text-align: right; }
+.clock, .heading:first-child { font-size: 11px; color: var(--muted); }
+.stamp { display: block; margin-top: 3px; font-size: 12px; color: var(--muted); font-weight: 400; }
 .slot { min-width: 0; border-left: 1px solid var(--line); }
 .slot:hover { background: var(--raised); }
-.event { display: block; min-height: 30px; width: 100%; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-size: 12px; border-inline-start: 2px solid #aaa; }
-.event.confirmed { background: var(--ink); border-color: var(--ink); color: var(--inverse); }
-.event.confirmed:hover { filter: contrast(.8); }
-#history { padding: 0 14px; }
-.empty { padding-block: 18px; }
-details { padding: 12px 0; border-bottom: 1px solid var(--line); }
-summary { cursor: pointer; font-weight: 650; }
-.stamp { display: block; margin-top: 4px; }
-.issue { margin-top: 10px; overflow-wrap: anywhere; }
-dl { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 6px; }
+.slot.now { box-shadow: inset 0 2px var(--ink); background: var(--raised); }
+.clock.now { color: var(--ink); font-weight: 700; }
+.event { display: block; min-height: 30px; width: 100%; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-size: 12px; border-radius: 4px; border: 1px solid var(--ink); background: var(--panel); }
+.event.offered { border-style: dashed; }
+.event.void { border-color: var(--line-strong); color: var(--muted); text-decoration: line-through; }
+.event.confirmed { background: var(--ink); border-color: var(--ink); color: var(--inverse); font-weight: 600; }
+.event.confirmed:hover { background: var(--ink); opacity: .85; }
+.event.is-live { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* History */
+.search { padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.search input { width: 100%; border-radius: 999px; padding-inline: 16px; }
+#history { padding: 0 16px; }
+.empty { padding-block: 28px; text-align: center; }
+#history > details { padding: 14px 0; border-bottom: 1px solid var(--line); }
+#history > details:last-child { border-bottom: 0; }
+#history > details.is-live { margin-inline: -16px; padding-inline: 16px; box-shadow: inset 3px 0 var(--ink); }
+summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+summary::marker { color: var(--muted); }
+details.is-live > summary::after { content: "Jonli"; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: var(--ink); color: var(--inverse); font-size: 11px; font-weight: 600; vertical-align: 2px; }
+.issue { margin-top: 10px; font-size: 15px; overflow-wrap: anywhere; }
+dl { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 5px 10px; margin: 14px 0; font-size: 13px; }
 dd { margin: 0; overflow-wrap: anywhere; }
-.decision { display: flex; gap: 7px; flex-wrap: wrap; }
+.decision { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .decision details, .decision p { flex-basis: 100%; }
+.decision details { padding: 8px 0 0; border: 0; }
 .decision input, .decision select { margin: 8px 4px 4px 0; max-width: 100%; }
-.callback { margin: 8px 0; padding: 8px 10px; border-inline-start: 2px solid #aaa; background: var(--raised); overflow-wrap: anywhere; }
+.callback { margin: 10px 0; padding: 10px 12px; border-left: 3px solid var(--ink); background: var(--raised); overflow-wrap: anywhere; }
+.booking-status { display: inline-block; margin: 6px 6px 0 0; padding: 2px 9px; border: 1px solid var(--ink); border-radius: 999px; font-size: 11px; font-weight: 600; }
+.booking-status[data-state=accepted] { background: var(--ink); color: var(--inverse); }
+.booking-status[data-state=offered], .booking-status[data-state=deposit] { border-style: dashed; }
+.booking-status[data-state=rejected], .booking-status[data-state=cancelled] { border-color: var(--line-strong); color: var(--muted); text-decoration: line-through; }
+
+/* Restaurant menu */
+.menu-block { margin: 12px 0; border: 1px solid var(--line); padding: 12px 14px; background: var(--raised); }
+.menu-block h3 { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
+.menu-block ul { margin: 0 0 10px; padding-left: 18px; overflow-wrap: anywhere; }
+.menu-block textarea { background: var(--panel); color: var(--ink); display: block; width: 100%; min-height: 80px; resize: vertical; border: 1px solid var(--border-control); border-radius: 6px; margin: 8px 0; padding: 8px 10px; font: inherit; }
+.menu-block details { padding: 0; border: 0; }
+body[data-business=restaurant] .layout { grid-template-columns: minmax(0, 1fr) minmax(360px, 430px); }
+
+@media (max-width: 1200px) {
+  .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .metric:nth-child(4) { border-left: 0; }
+  .metric:nth-child(n+4) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 1100px) { body[data-business=restaurant] .layout { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 990px) {
-  header, main { width: min(100% - 32px, 1460px); }
+  header, main { width: min(100% - 32px, 1480px); }
   .layout { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 650px) {
-  header { height: 64px; }
-  main { padding-block: 27px; }
-  .metrics { grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); }
-  .metric { min-height: 78px; padding: 10px; }
-  .metric strong { font-size: 24px; }
+  #workspaceHero { grid-template-columns: minmax(0, 1fr); padding: 28px 0 20px; }
+  #roomFilters { justify-content: flex-start; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metric, .metric:nth-child(4) { border-left: 1px solid var(--line); border-top: 1px solid var(--line); padding: 14px; }
+  .metric:nth-child(odd) { border-left: 0; }
+  .metric:nth-child(-n+2) { border-top: 0; }
+  .metric strong { font-size: 30px; }
   .schedule { max-height: 55vh; }
+  #live { grid-template-columns: auto minmax(0, 1fr) auto; }
+  #liveWho { grid-column: 1 / -1; grid-row: 2; }
+  #liveOpen { grid-column: 1 / -1; }
+}
+@media (max-width: 540px) {
+  header { padding: 10px 0; flex-wrap: wrap; gap: 8px; }
+  .header-actions { flex-wrap: wrap; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
   button { transition: none; }
   button:active { transform: none; }
-}
-#businessBar { display:flex; flex-wrap:wrap; gap:8px; margin: 18px 0 24px; }
-#businessBar button { display:inline-flex; align-items:center; gap:8px; }
-#businessBar svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
-#businessBar [aria-pressed=true] { color:var(--inverse); background:var(--ink); border-color:var(--ink); }
-#businessBar button:disabled { opacity:.6; }
-#workspaceHero { display:flex; align-items:center; justify-content:space-between; gap:24px; }
-#roomFilters { display:flex; flex-wrap:wrap; gap:6px; }
-#roomFilters:empty { display:none; }
-#roomFilters [aria-pressed=true] { background:var(--ink); color:var(--canvas); border-color:var(--ink); }
-body[data-business=restaurant] #workspaceHero {
-  padding:clamp(20px,4vw,44px); border:1px solid var(--line);
-  border-radius:14px; background:#181817; color:#fafaf8;
-}
-body[data-business=restaurant] #workspaceHero .muted { color:#c9c9c5; }
-body[data-business=restaurant] h1 { font-family:Georgia,serif; font-weight:400; letter-spacing:-.06em; }
-body[data-business=restaurant] #roomFilters button { color:#f4f4f1; background:#262625; border-color:#555553; }
-body[data-business=restaurant] #roomFilters [aria-pressed=true] { color:#171716; background:#f4f4f1; border-color:#f4f4f1; }
-body[data-business=restaurant] #roomFilters button:focus-visible { outline-color:#fff; }
-body[data-business=restaurant] .layout { grid-template-columns:minmax(0, 1fr) minmax(345px, 420px); }
-.menu-block { margin:12px 0; border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel); }
-.menu-block h3 { font-size:14px; margin:0 0 7px; }
-.menu-block ul { margin:0 0 10px; padding-left:20px; overflow-wrap:anywhere; }
-.menu-block textarea { background:var(--raised); color:var(--ink); display:block; width:100%; min-height:72px; resize:vertical; border:1px solid var(--line); border-radius:6px; margin:8px 0; padding:8px; font:inherit; }
-.menu-block details { border-bottom:0; padding-bottom:0; }
-.booking-status { display:inline-block; font:500 11px var(--mono); margin-top:7px; padding:4px 7px; border:1px solid var(--line); border-radius:5px; }
-@media(max-width:1100px) { body[data-business=restaurant] .layout { grid-template-columns:minmax(0,1fr); } }
-@media(max-width:650px) { #workspaceHero { align-items:flex-start; flex-direction:column; } }
-.header-actions { display:flex; gap:10px; align-items:center; }
-.theme-switch { display:flex; gap:3px; padding:3px; border:1px solid var(--line); border-radius:9px; }
-.theme-switch button { min-height:30px; padding:4px 9px; background:transparent; border-color:transparent; }
-.theme-switch button[aria-pressed=true] { background:var(--ink); color:var(--inverse); }
-@media(max-width:540px) {
-  header { height:auto; min-height:64px; padding:10px 0; flex-wrap:wrap; gap:8px; }
-  .header-actions { flex-wrap:wrap; gap:6px; }
+  #live .pulse i { animation: none; transform: scaleY(.6); }
 }
 </style>
 <header><span class="brand"><span class="brand-mark">404</span>Voice Agency</span><div class="header-actions">
@@ -161,11 +224,12 @@ body[data-business=restaurant] .layout { grid-template-columns:minmax(0, 1fr) mi
 <div id="workspaceHero"><div><h1 id="businessTitle">Avtoservis</h1><p id="businessSubtitle" class="muted">Bronlar va Telegram qo‘ng‘iroqlari</p></div>
 <div id="roomFilters" role="group" aria-label="Xonalar filtri"></div></div>
 <p id="businessFeedback" class="muted" role="status"></p>
+<div id="live" role="status" aria-live="polite" hidden><span class="pulse" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><strong id="liveTitle">Jonli qo‘ng‘iroq</strong><span id="liveWho"></span><span id="liveTimer">00:00</span><button type="button" id="liveOpen">Kartani ochish</button></div>
 <div class="metrics" id="metrics"></div>
 <div class="layout">
 <section aria-label="Haftalik kalendar"><div class="bar"><h2 id="week"></h2><div class="controls"><select id="worker" aria-label="Usta"><option value="">Barcha ustalar</option><option>Aziz</option><option>Bekzod</option></select><button id="prev" aria-label="Oldingi hafta">←</button> <button id="today">Bugun</button> <button id="next" aria-label="Keyingi hafta">→</button></div></div>
 <div class="schedule" id="schedule"><div class="grid" id="calendar"></div></div></section>
-<aside><div class="bar"><h2 id="historyTitle">Qo‘ng‘iroqlar tarixi</h2><button id="all">Hammasi</button></div><div id="history"></div></aside>
+<aside><div class="bar"><h2 id="historyTitle">Qo‘ng‘iroqlar tarixi</h2><button id="all">Hammasi</button></div><div class="search"><input id="search" type="search" placeholder="Ism, model, telefon yoki muammo" aria-label="Murojaatlarni qidirish" autocomplete="off"></div><div id="history"></div></aside>
 </div></main>
 <script>
 const el = id => document.getElementById(id);
@@ -189,7 +253,16 @@ const monday = daysFrom(current,-((current.getDay()+6)%7));
 const dateLabel = new Intl.DateTimeFormat('uz-Latn-UZ',{day:'numeric',month:'short'});
 const dayLabel = new Intl.DateTimeFormat('uz-Latn-UZ',{weekday:'short',day:'numeric'});
 const money = new Intl.NumberFormat('uz-UZ');
-let cursor = monday, selected = '', rows = [], allRows = [], last = '';
+let cursor = monday, selected = '', rows = [], allRows = [], last = '', live = {active:false}, pendingRender = false, waiting = 0;
+function setTitle() {
+  document.title=(live.active?'● ':waiting?'('+waiting+') ':'')+'Voice Agency 404 · '+profile.name;
+}
+const editing = () => {
+  const active=document.activeElement;
+  return Boolean(active && el('history').contains(active) && ['INPUT','TEXTAREA','SELECT'].includes(active.tagName));
+};
+const matches = (row, query) => !query || [row.car,row.issue,row.service,row.phone,row.username,row.worker,row.id,...(row.menu_items||[])]
+  .some(value=>String(value||'').toLocaleLowerCase('uz').includes(query));
 let profile = {id:'auto',name:'Avtoservis',resource:'Usta',resources:['Aziz','Bekzod'],services:[],opens:9,closes:18};
 const iconPaths = {
   auto:'M3 16v-4l2-2 2-5h10l2 5 2 2v4H3z M5 16v2 M19 16v2 M6 13h2 M16 13h2 M5 10h14',
@@ -215,7 +288,7 @@ async function loadBusiness() {
   function show(next) {
     profile=next;
     document.body.dataset.business=next.id;
-    document.title='Voice Agency 404 ? '+next.name;
+    setTitle();
     el('businessSubtitle').textContent=next.id==='restaurant'?'Stol, xona va banket bronlari':'Bronlar va Telegram qo‘ng‘iroqlari';
     selected='';
     el('businessTitle').textContent=next.name;
@@ -251,7 +324,7 @@ async function loadBusiness() {
   }));
   show(profiles.find(item=>item.id===active));
 }
-const calendarDate = row => row.previous_slot || (row.status === "accepted" ? row.slot : row.status ? row.created : row.visit || row.created);
+const calendarDate = row => row.previous_slot || (['accepted','offered'].includes(row.status) && row.slot ? row.slot : row.status ? row.created : row.visit || row.created);
 const dayOf = row => calendarDate(row).slice(0,10);
 const timeOf = row => calendarDate(row).slice(11,16);
 function node(tag,text='',className='') {
@@ -269,6 +342,7 @@ async function decide(row, action, output, slot) {
     });
     const result=await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(result.error || 'Amal bajarilmadi.');
+    pull(row.id);
     output.textContent=action==='save_menu'?'Menyu saqlandi.':action==='set_service'?'Xizmat saqlandi.':action==='deposit_paid'?'Omonat qayd qilindi.':action==='assign'?profile.resource+' tanlandi.':action==='callback_done'?'Vazifa yopildi.':'Saqlandi. Telegram xabari yuboriladi.';
   } catch(error) {
     output.textContent=error.message;
@@ -402,19 +476,25 @@ function render(openId) {
     calendar.append(button);
   }
   const slots = new Map();
+  const nowHour = new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tashkent',hour:'2-digit',hourCycle:'h23'}).format(new Date());
+  const thisWeek = days.some(date=>dateKey(date)===today);
   for(const hour of ['Vaqtsiz',...Array.from({length:24},(_,h)=>String(h).padStart(2,'0'))]) {
-    calendar.append(node('div',hour==='Vaqtsiz'?hour:hour+':00','clock'));
+    calendar.append(node('div',hour==='Vaqtsiz'?hour:hour+':00',thisWeek && hour===nowHour?'clock now':'clock'));
     for(const date of days) {
-      const slot = node('div','','slot');
+      const slot = node('div','',dateKey(date)===today && hour===nowHour?'slot now':'slot');
       slots.set(dateKey(date)+'/'+hour,slot);
       calendar.append(slot);
     }
   }
   const currentCalls=rows.filter(row=>row.created.startsWith(today));
+  const converted=currentCalls.filter(row=>row.status==='accepted'||row.previous_slot).length;
+  waiting=rows.filter(row=>row.status==='offered'||row.move_requested||(!row.status&&row.visit)).length;
+  setTitle();
   el('metrics').replaceChildren(...[
     ['Bugungi qo‘ng‘iroqlar',currentCalls.length],
-    ['Tashrifga aylangan',currentCalls.filter(row=>row.status==='accepted'||row.previous_slot).length],
-    ['Javob kutmoqda',rows.filter(row=>row.status==='offered'||row.move_requested||(!row.status&&row.visit)).length],
+    ['Tashrifga aylangan',converted],
+    ['Konversiya',currentCalls.length?Math.round(converted*100/currentCalls.length)+'%':'—'],
+    ['Javob kutmoqda',waiting],
     ['Xabar yuborilmadi',rows.filter(row=>row.delivery==='failed'||row.reminder==='failed').length],
     ['Qayta qo‘ng‘iroq',rows.filter(row=>row.callback&&!row.callback_done).length]
   ].map(([label,value])=>{
@@ -428,21 +508,27 @@ function render(openId) {
     if(!slot) continue;
     const event = node('button',[time,profile.id==='auto'?(row.car||row.service):(row.service+' · '+row.worker)].filter(Boolean).join(' '),'event');
     if(row.status==='accepted'||row.previous_slot) event.classList.add('confirmed');
+    else if(row.status==='offered') event.classList.add('offered');
+    else if(['rejected','cancelled'].includes(row.status)) event.classList.add('void');
+    if(live.active && live.request_id===row.id) event.classList.add('is-live');
     event.onclick=()=>{selected=dayOf(row);render(row.id);document.getElementById('call-'+row.id).querySelector('summary').focus();};
     slot.append(event);
   }
-  const visible = rows.filter(row=>(!el('worker').value||row.worker===el('worker').value) && (!selected||dayOf(row)===selected||row.created.startsWith(selected)));
+  const query=el('search').value.trim().toLocaleLowerCase('uz');
+  const visible = rows.filter(row=>(!el('worker').value||row.worker===el('worker').value) && (!selected||dayOf(row)===selected||row.created.startsWith(selected)) && matches(row,query));
   el('historyTitle').textContent = selected || 'Qo‘ng‘iroqlar tarixi';
   history.replaceChildren();
-  if(!visible.length) history.append(node('p','Murojaatlar yo‘q.','muted empty'));
+  if(!visible.length) history.append(node('p',query?'Qidiruv bo‘yicha murojaat topilmadi.':'Murojaatlar yo‘q.','muted empty'));
   for(const row of visible) {
     const card=node('details'), summary=node('summary',[row.car,row.service].filter(Boolean).join(' · '));
     card.id='call-'+row.id; card.dataset.id=row.id; card.open=opened.has(row.id);
-    if(profile.id==='restaurant') summary.append(node('span',
-      row.status==='accepted'?'Tasdiqlangan':row.deposit && !row.deposit_paid?'Omonat kutilmoqda':
-      row.status==='offered'?'Mijoz javobi kutilmoqda':row.status==='rejected'?'Rad etilgan':
-      row.status==='cancelled'?'Bekor qilingan':'Yangi so‘rov','booking-status'));
+    if(live.active && live.request_id===row.id) card.classList.add('is-live');
     summary.append(node('span',row.created.slice(0,16).replace('T',' '),'stamp'));
+    const state=row.status==='accepted'?'accepted':row.deposit && !row.deposit_paid?'deposit':row.status||'new';
+    const chip=node('span',({accepted:'Tasdiqlangan',deposit:'Omonat kutilmoqda',offered:'Mijoz javobi kutilmoqda',
+      rejected:'Rad etilgan',cancelled:'Bekor qilingan'})[state] || 'Yangi so‘rov','booking-status');
+    chip.dataset.state=state;
+    summary.append(chip);
     card.append(summary,node('p',row.issue||'Qo‘ng‘iroq qayd qilindi. Tafsilotlar kutilmoqda.','issue'));
     const fields=node('dl');
     for(const [label,value] of [
@@ -453,6 +539,7 @@ function render(openId) {
       ['Xabar',({queued:'Navbatda',sent:'Yuborildi',failed:'Yuborilmadi'})[row.delivery] || '-'],
       ['Narx',row.low?money.format(row.low)+'–'+money.format(row.high)+' so‘m':'Aniqlanmagan'],
       ['Telegram',row.username?'@'+row.username:'ID '+row.caller_id],
+      ['Til',({uz:'O‘zbekcha',ru:'Ruscha',en:'Inglizcha'})[row.language] || '-'],
       [profile.resource,row.worker+' · '+row.duration+' daqiqa'+(row.assigned_worker?'':' · Tavsiya')],
       ['Kelishi',({calling:'Qo‘ng‘iroq ketmoqda',coming:'Kelyapti',cannot_come:'Kela olmaydi',unclear:'Aniqlanmadi',no_answer:'Javob olmadi'})[row.attendance] || '-'],
       ['Qo‘ng‘iroq',row.consent?'Rozilik bor':'Rozilik yo‘q'],
@@ -472,17 +559,59 @@ el('worker').onchange=()=>render();
 el('prev').onclick=()=>{cursor=daysFrom(cursor,-7);selected='';render();};
 el('next').onclick=()=>{cursor=daysFrom(cursor,7);selected='';render();};
 el('today').onclick=()=>{cursor=monday;selected='';render();};
-el('all').onclick=()=>{selected='';render();};
-async function refresh() {
+el('all').onclick=()=>{selected='';el('search').value='';render();};
+el('search').oninput=()=>render();
+// Background refreshes wait while staff type in a card, so a new call never wipes their edits.
+function safeRender(openId) {
+  if(editing()) { pendingRender=true; return; }
+  pendingRender=false;
+  render(openId);
+}
+el('history').addEventListener('focusout',()=>setTimeout(()=>{ if(pendingRender) safeRender(); },0));
+function openLive() {
+  const row=allRows.find(item=>item.id===live.request_id);
+  if(!row) return;
+  selected='';
+  el('search').value='';
+  render(row.id);
+  document.getElementById('call-'+row.id)?.scrollIntoView({block:'nearest'});
+  document.getElementById('call-'+row.id)?.querySelector('summary').focus();
+}
+el('liveOpen').onclick=openLive;
+function showLive() {
+  const banner=el('live');
+  banner.hidden=!live.active;
+  if(!live.active) return;
+  const row=allRows.find(item=>item.id===live.request_id);
+  el('liveTitle').textContent=live.direction==='outbound'?'AI mijozga qo‘ng‘iroq qilmoqda':'Jonli qo‘ng‘iroq';
+  el('liveWho').textContent=row ? (row.username?'@'+row.username:'ID '+row.caller_id)+(row.car?' · '+row.car:'') : 'ID '+live.caller_id;
+  el('liveOpen').hidden=!row;
+  const seconds=Math.max(0,Math.floor((Date.now()-Date.parse(live.since))/1000));
+  el('liveTimer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+}
+setInterval(showLive,1000);
+async function pull(openId) {
   try {
-    const response=await fetch('/api/requests');
-    if(!response.ok) throw new Error('Server unavailable');
-    const payload=await response.text();
-    if(payload!==last){allRows=JSON.parse(payload);rows=allRows.filter(row=>row.business===profile.id);last=payload;render();}
+    const [response,liveResponse]=await Promise.all([fetch('/api/requests'),fetch('/api/live')]);
+    if(!response.ok || !liveResponse.ok) throw new Error('Server unavailable');
+    const payload=await response.text(), nextLive=await liveResponse.json();
+    const liveChanged=nextLive.active!==live.active || nextLive.request_id!==live.request_id;
+    live=nextLive;
+    if(payload!==last){allRows=JSON.parse(payload);rows=allRows.filter(row=>row.business===profile.id);last=payload;safeRender(openId);}
+    else if(liveChanged || openId) safeRender(openId);
+    showLive();
+    setTitle();
     el('status').dataset.live='true';
     el('status').textContent='Lokal · Ulangan';
-  } catch {el('status').dataset.live='false';el('status').textContent='Aloqa uzildi';}
-  finally {setTimeout(refresh,2500);}
+  } catch(error) {
+    console.warn('Dashboard refresh failed:',error);
+    el('status').dataset.live='false';
+    el('status').textContent='Aloqa uzildi';
+  }
+}
+async function refresh() {
+  await pull();
+  setTimeout(refresh,2500);
 }
 render();
 el('schedule').scrollTop=230;
